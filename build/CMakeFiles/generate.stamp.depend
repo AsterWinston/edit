@@ -1,0 +1,25 @@
+# CMake generation dependency list for this directory.
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/CMakeCInformation.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/CMakeCXXInformation.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/CMakeGenericSystem.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/CMakeRCInformation.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/Compiler/MSVC-C.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/Compiler/MSVC-CXX.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/Compiler/MSVC.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/Platform/Windows-MSVC-C.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/Platform/Windows-MSVC-CXX.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/Platform/Windows-MSVC.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/Platform/Windows.cmake
+C:/Qt/Tools/CMake_64/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake
+D:/software/myEditor/CMakeLists.txt
+D:/software/myEditor/build/CMakeFiles/3.29.3/CMakeCCompiler.cmake
+D:/software/myEditor/build/CMakeFiles/3.29.3/CMakeCXXCompiler.cmake
+D:/software/myEditor/build/CMakeFiles/3.29.3/CMakeRCCompiler.cmake
+D:/software/myEditor/build/CMakeFiles/3.29.3/CMakeSystem.cmake

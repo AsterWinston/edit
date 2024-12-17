@@ -1,0 +1,3 @@
+D:/software/myEditor/build/CMakeFiles/edit.dir
+D:/software/myEditor/build/CMakeFiles/ALL_BUILD.dir
+D:/software/myEditor/build/CMakeFiles/ZERO_CHECK.dir
