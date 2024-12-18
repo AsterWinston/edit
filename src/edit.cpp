@@ -9,6 +9,7 @@ using std::string;
 
 int main(int argc, char* argv[]){
     Text text;
+    string file;
     if(argc==1){
         cout<<"parameter too less!"<<endl;
         return -1;
@@ -19,13 +20,16 @@ int main(int argc, char* argv[]){
         vector<string> v;
         v.push_back(string(path));
         v.push_back(string(argv[1]));
-        if(initEdit(v, text))return -2;
+        if(initEdit(v, text, file))return -2;
     }
     else{
         cout<<"parameters too much!"<<endl;
         return -1;
     }
-    editFile(text);
+
+    if(editFile(text, file)){
+        save(text, file);
+    }
     return 0;
 }
 
