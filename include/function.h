@@ -38,6 +38,7 @@ void initLineInfo(Text& text ,vector<int>& vectorLineNumber, vector<int>& vector
 //非引用传参导致内存重复释放，浅拷贝
 void showUI(HANDLE& hConsole, Text& text, Mouse& mouse, MyWindow& myWin, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, string bottomContent, int startLineNumberInConsole, int indexCount);
 void showCursor(HANDLE& hConsole, Mouse& mouse, MyWindow& myWin, vector<int>& vectorLineNumber, Mode& mode, string bottomContent, int startLineNumberInConsole, int indexCount);
+void showBottomInfo(HANDLE& hConsole, Mouse& mouse, MyWindow& myWin, string bottomContent);
 
 void setCursorPosition(HANDLE& hConsole, int x, int y);
 void resetCursor(HANDLE& hConsole);

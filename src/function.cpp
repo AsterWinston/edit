@@ -122,10 +122,6 @@ void showUI(HANDLE& hConsole, Text& text, Mouse& mouse, MyWindow& myWin, vector<
             }
         }
     }
-    setCursorPosition(hConsole, 0, myWin.height - 1 - bottomLineCount);
-    cout<<bottomContent;
-    setCursorPosition(hConsole, myWin.wide - (getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + 1), myWin.height - 1);
-    cout<<mouse.getY()+1<<','<<mouse.getX()+1;
     //内容
     int tempLineNumber = startLineNumberInConsole, count = 0;
     while(!(lineNumberInText = getLineNumberInText(tempLineNumber--, vectorLineNumber)))count++;
@@ -167,6 +163,22 @@ void showCursor(HANDLE& hConsole, Mouse& mouse, MyWindow& myWin, vector<int>& ve
         }
     }
 }
+void showBottomInfo(HANDLE& hConsole, Mouse& mouse, MyWindow& myWin, string bottomContent){
+    CONSOLE_CURSOR_INFO cursorInfo;
+    GetConsoleCursorInfo(hConsole, &cursorInfo);
+    cursorInfo.bVisible = false;
+    SetConsoleCursorInfo(hConsole, &cursorInfo);
+
+    int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
+    //清空底部
+    setCursorPosition(hConsole, 0, myWin.height - bottomLineCount);
+    for(int i=0;i<myWin.wide*bottomLineCount;i++)cout<<' ';
+    //输出底部信息
+    setCursorPosition(hConsole, 0, myWin.height - bottomLineCount);
+    cout<<bottomContent;
+    setCursorPosition(hConsole, myWin.wide - (getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + 1), myWin.height - 1);
+    cout<<mouse.getY()+1<<','<<mouse.getX()+1;
+}
 
 void setCursorPosition(HANDLE& hConsole, int x, int y){
     COORD cursorPosition;
@@ -198,7 +210,7 @@ int moveUp(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& my
             startLineNumberInConsole=startLineNumberInConsole-(gapSize-posInConsole.getY())>1?startLineNumberInConsole-(gapSize-posInConsole.getY()):1;
         }
         if(startLineNumberRecord!=startLineNumberInConsole)return 1;
-        return 0;
+        return 2;
     }
 }
 int moveDown(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, MyWindow& myWin, string bottomContent, int indexCount, int& startLineNumberInConsole){
@@ -214,13 +226,13 @@ int moveDown(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<int
         int gapSize = (myWin.height-1-bottomLineCount)/2>5?5:(myWin.height-1-bottomLineCount)/2;
         if(mouse.getX()>(*text.v)[mouse.getY()].size() - 1||(*text.v)[mouse.getY()].size() == 0)mouse.renewX((*text.v)[mouse.getY()].size() == 0?0:(*text.v)[mouse.getY()].size() - 1);
         if(posInConsole.getY()>myWin.height-1-bottomLineCount-gapSize){
-            if(vectorLineNumber[vectorLineNumber.size()-1]+vectorLineCount[vectorLineCount.size()-1]-startLineNumberInConsole<=myWin.height-bottomLineCount)return 0;
+            if(vectorLineNumber[vectorLineNumber.size()-1]+vectorLineCount[vectorLineCount.size()-1]-startLineNumberInConsole<=myWin.height-bottomLineCount)return 2;
             else {
                 startLineNumberInConsole=startLineNumberInConsole+(posInConsole.getY()-(myWin.height-bottomLineCount-1-gapSize))<vectorLineNumber[vectorLineNumber.size()-1]+vectorLineCount[vectorLineCount.size()-1]-(myWin.height-bottomLineCount)?startLineNumberInConsole+(posInConsole.getY()-(myWin.height-bottomLineCount-1-gapSize)):vectorLineNumber[vectorLineNumber.size()-1]+vectorLineCount[vectorLineCount.size()-1]-(myWin.height-bottomLineCount);
             }
         }
         if(startLineNumberRecord!=startLineNumberInConsole)return 1;
-        return 0;
+        return 2;
     }
 }
 int moveLeft(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& myWin, string bottomContent, int indexCount, int& startLineNumberInConsole){
@@ -238,7 +250,7 @@ int moveLeft(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& 
             startLineNumberInConsole=startLineNumberInConsole-1>1?startLineNumberInConsole-1:1;
         }
         if(startLineNumberRecord!=startLineNumberInConsole)return 1;
-        return 0;
+        return 2;
     }
 }
 int moveRight(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<int>& vectorLineCount,MyWindow& myWin, string bottomContent, int indexCount, int& startLineNumberInConsole){
@@ -253,19 +265,20 @@ int moveRight(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<in
         int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
         int gapSize = (myWin.height-1-bottomLineCount)/2>5?5:(myWin.height-1-bottomLineCount)/2;
         if(posInConsole.getY()>myWin.height-1-bottomLineCount-gapSize){
-            if(vectorLineNumber[vectorLineNumber.size()-1]+vectorLineCount[vectorLineCount.size()-1]-startLineNumberInConsole<=myWin.height-bottomLineCount)return 0;
+            if(vectorLineNumber[vectorLineNumber.size()-1]+vectorLineCount[vectorLineCount.size()-1]-startLineNumberInConsole<=myWin.height-bottomLineCount)return 2;
             else{
                 startLineNumberInConsole=startLineNumberInConsole+1<vectorLineNumber[vectorLineNumber.size()-1]+vectorLineCount[vectorLineCount.size()-1]-(myWin.height-bottomLineCount)?startLineNumberInConsole+1:vectorLineNumber[vectorLineNumber.size()-1]+vectorLineCount[vectorLineCount.size()-1]-(myWin.height-bottomLineCount);
             }
         }
         if(startLineNumberRecord!=startLineNumberInConsole)return 1;
-        return 0;
+        return 2;
     }
 }
 
 void captureInput(bool& status, queue<int>& queueInput){
     int temp;
     while(status){
+        Sleep(10);
         if(_kbhit()){
             temp=_getch();
             queueInput.push(temp);
@@ -278,10 +291,18 @@ void captureInput(bool& status, queue<int>& queueInput){
     }
 }
 void processWindowChange(bool& status, HANDLE& hConsole, Text& text, MyWindow& myWin, vector<int>* vectorLineNumber, vector<int>* vectorLineCount, Mouse& mouse, Mode& mode, string& bottomContent, int& startLineNumberInConsole, int& indexCount){
-
+    CONSOLE_SCREEN_BUFFER_INFO csbi;//获取窗口大小信息
     while(status){
         Sleep(10);
-
+        if(GetConsoleScreenBufferInfo(hConsole, &csbi)){
+            if(myWin.wide != csbi.srWindow.Right - csbi.srWindow.Left + 1 || myWin.height != csbi.srWindow.Bottom - csbi.srWindow.Top + 1){
+                myWin = getMyWindow(hConsole);
+                initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                system("cls");
+                showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
+                showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
+            }
+        }
     }
 }
 
@@ -308,7 +329,7 @@ int editFile(Text& text, const string file){
     MyWindow myWin = getMyWindow(hConsole);//记录窗口大小信息
     //text行数变化就更新
     int indexCount = getIndexCount(text);//记录文本最大行数的位数
-    bool mainThreadStatus = true, subThreadStatus = true;
+    bool runStatus = true, getInputsStatus = true, handleWinVarStatus = true;
     string commandInput;//记录命令
     queue<int> queueInput;//记录输入
     string destination;//记录查找串
@@ -316,27 +337,19 @@ int editFile(Text& text, const string file){
     vector<Position>* result = new vector<Position>;//记录查找结果
     //有内容输入就更新
     int tempInput;//输入
-    bool LastCharIsspecial = 0;
-    CONSOLE_SCREEN_BUFFER_INFO csbi;//获取窗口大小信息
+    bool LastCharIsspecial = 0;//记录是遇到0或者224但是queueInput为空，即特殊键输入还没有完全入队
+    int flag;
+
     initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
     showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
     showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-    thread capInput(captureInput, std::ref(subThreadStatus), std::ref(queueInput));
-
-    while(mainThreadStatus){
+    thread capInput(captureInput, std::ref(getInputsStatus), std::ref(queueInput));
+    thread handleWinVar(processWindowChange, std::ref(handleWinVarStatus), std::ref(hConsole), std::ref(text), std::ref(myWin), vectorLineNumber, vectorLineCount, std::ref(mouse), std::ref(mode), std::ref(bottomContent), std::ref(startLineNumberInConsole), std::ref(indexCount));
+    while(runStatus){
         switch (mode){
             LastCharIsspecial = 0;
             case Mode::command:
                 while(1){
-                    if(GetConsoleScreenBufferInfo(hConsole, &csbi)){
-                        if(myWin.wide != csbi.srWindow.Right - csbi.srWindow.Left + 1 || myWin.height != csbi.srWindow.Bottom - csbi.srWindow.Top + 1){
-                            myWin = getMyWindow(hConsole);
-                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
-                            system("cls");
-                            showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                            showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                        }
-                    }
                     if(!queueInput.empty()){
                         tempInput = queueInput.front();
                         queueInput.pop();
@@ -364,32 +377,44 @@ int editFile(Text& text, const string file){
                                 case 83://delete
                                 break;
                                 case 72://上
-                                    if(moveUp(text, mouse, *vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                        system("cls");
-                                        showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
+                                    if(flag = moveUp(text, mouse, *vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
+                                        if(flag==1){
+                                            system("cls");
+                                            showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
+                                        }
+                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
+                                        showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
                                     }
-                                    showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
                                 break;
                                 case 80://下
-                                    if(moveDown(text, mouse, *vectorLineNumber, *vectorLineCount, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                        system("cls");
-                                        showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
+                                    if(flag = moveDown(text, mouse, *vectorLineNumber, *vectorLineCount, myWin, bottomContent, indexCount, startLineNumberInConsole)){
+                                        if(flag==1){
+                                            system("cls");
+                                            showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
+                                        }
+                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
+                                        showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
                                     }
-                                    showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
                                 break;
                                 case 75://左
-                                    if(moveLeft(text, mouse, *vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                        system("cls");
-                                        showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
+                                    if(flag = moveLeft(text, mouse, *vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
+                                        if(flag==1){
+                                            system("cls");
+                                            showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
+                                        }
+                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
+                                        showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
                                     }
-                                    showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
                                 break;
                                 case 77://右
-                                    if(moveRight(text, mouse, *vectorLineNumber, *vectorLineCount, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                        system("cls");
-                                        showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
+                                    if(flag = moveRight(text, mouse, *vectorLineNumber, *vectorLineCount, myWin, bottomContent, indexCount, startLineNumberInConsole)){
+                                        if(flag==1){
+                                            system("cls");
+                                            showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
+                                        }
+                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
+                                        showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
                                     }
-                                    showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
                                 break;
                                 default:break;//其他特殊按键不理会
                             }
@@ -537,15 +562,6 @@ int editFile(Text& text, const string file){
             case Mode::insert:
                 LastCharIsspecial = 0;
                 while(1){
-                    if(GetConsoleScreenBufferInfo(hConsole, &csbi)){
-                        if(myWin.wide != csbi.srWindow.Right - csbi.srWindow.Left + 1 || myWin.height != csbi.srWindow.Bottom - csbi.srWindow.Top + 1){
-                            myWin = getMyWindow(hConsole);
-                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
-                            system("cls");
-                            showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                            showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                        }
-                    }
                     if(!queueInput.empty()){
                         tempInput = queueInput.front();
                         queueInput.pop();
@@ -591,7 +607,7 @@ int editFile(Text& text, const string file){
                         else if(tempInput == 27){
                             mode=Mode::command;
                             bottomContent = "";
-                            showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
+                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
                             break;
                         }
                         //backspace
@@ -608,7 +624,7 @@ int editFile(Text& text, const string file){
             }
     }
 
-    subThreadStatus = false;
+    getInputsStatus = false;
     resetCursor(hConsole);
     delete vectorLineNumber;
     delete vectorLineCount;
