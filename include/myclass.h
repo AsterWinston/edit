@@ -28,26 +28,33 @@ public:
     Mouse(){}
     void renewPos(int x, int y);
     void renewX(int x);
-    void renewy(int y);
+    void renewY(int y);
     int getX()const noexcept;
     int getY()const noexcept;
     ~Mouse();
 };
 
-enum class operate{add, del};
+enum class operate{add, dele, repl};
+class oneStepOperation{
+public:
+    string str;
+    operate opr;
+    Position pos;
+};
 
 class OperationStack{
 private:
-    stack<string*> *s1;
-    stack<operate*> *s2;
-    stack<Position*> *s3;
+    stack<oneStepOperation>* stk;
 public:
-    OperationStack():s1(new stack<string*>()),s2(new stack<operate*>()),s3(new stack<Position*>()){}
-    void insert(string str, operate opr, Position pos);
-    void undo(Text& text);
+    OperationStack():stk(new stack<oneStepOperation>){}
+    void pushBack(string str, operate opr, Position pos);
+    void popBack();
+    oneStepOperation top();
     void clear();
+    bool empty();
     ~OperationStack();
 };
+
 
 class Text{
 public:

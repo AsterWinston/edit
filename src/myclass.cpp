@@ -10,7 +10,7 @@ void Mouse::renewPos(int x, int y){
 void Mouse::renewX(int x){
     this->p.x=x;
 }
-void Mouse::renewy(int y){
+void Mouse::renewY(int y){
     this->p.y=y;
 }
 int Mouse::getX()const noexcept{
@@ -23,63 +23,27 @@ Mouse::~Mouse(){
     //cout<<"destructing Mouse"<<endl;
 }
 
-void OperationStack::insert(string str, operate opr, Position pos){
-    s1->push(new string(str));
-    s2->push(new operate(opr));
-    s3->push(new Position(pos));
-}
-void OperationStack::undo(Text& text){
-
+void OperationStack::pushBack(string str, operate opr, Position pos){
+    stk->push({str, opr, pos});
 }
 void OperationStack::clear(){
-    if(s1){
-        while(!s1->empty()){
-            delete s1->top();
-            s1->pop();
-        }
-    }
-    if(s2){
-        while(!s2->empty()){
-            delete s2->top();
-            s2->pop();
-        }
-    }
-    if(s3){
-        while(!s3->empty()){
-            delete s3->top();
-            s3->pop();
-        }
-    }
-
+    while(!stk->empty())stk->pop();
+}
+void OperationStack::popBack(){
+    stk->pop();
+}
+oneStepOperation OperationStack::top(){
+    return stk->top();
+}
+bool OperationStack::empty(){
+    return stk->empty();
 }
 OperationStack::~OperationStack(){
     //cout<<"destructing OperationStack"<<endl;
-    if(s1){
-        while(!s1->empty()){
-            delete s1->top();
-            s1->pop();
-        }
-        delete s1;
-        s1=nullptr;
-    }
-    if(s2){
-        while(!s2->empty()){
-            delete s2->top();
-            s2->pop();
-        }
-        delete s2;
-        s2=nullptr;
-    }
-    if(s3){
-        while(!s3->empty()){
-            delete s3->top();
-            s3->pop();
-        }
-        delete s3;
-        s3=nullptr;
-    }
+    if(stk)delete stk;
     //cout<<"finish destrction of Opstk"<<endl;
 }
+
 Text::~Text(){
     //cout<<"destructing Text"<<endl;
     delete this->v;

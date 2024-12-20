@@ -19,7 +19,9 @@ using std::thread;
 #include<queue>
 #include<atomic>
 using std::queue;
-
+//后续
+//参数和函数加修饰
+//计算进行优化
 
 enum class Mode{command, insert};
 
@@ -47,6 +49,19 @@ int moveUp(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& my
 int moveDown(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, MyWindow& myWin, string bottomContent, int indexCount, int& startLineNumberInConsole);
 int moveLeft(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& myWin, string bottomContent, int indexCount, int& startLineNumberInCOnsole);
 int moveRight(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, MyWindow& myWin, string bottomContent, int indexCount, int& startLineNumberInConsole);
+int pageUp(Mouse& mouse, vector<int>& vectorLineNumber,MyWindow& myWin, string bottomContent, int indexCount, int& startLineNumberInConsole);
+int pageDown(Mouse& mouse, vector<int>& vectorLineNumber, vector<int>& vectorLineCount,MyWindow& myWin, string bottomContent, int indexCount, int& startLineNumberInConsole);
+int home(Mouse& mouse, int& startLineNumberInConsole);
+int end(Mouse& mouse, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, MyWindow& myWin, string bottomContent, int indexCount, int& startLineNumberInConsole);
+int moveToLHeadOfLine(Mouse& mouse, vector<int>& vectorLineNumber, int& startLineNumberInConsole);
+int moveToEndOfLine(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& myWin, string bottomContent, int& startLineNumberInConsole);
+
+
+int deleteCharHere(Text& text, Mouse& mouse, MyWindow& myWin, int indexCount, int& startLineNumberInConsole);
+int deleteCharAfter(Text& text, Mouse& mouse);
+int deleteCharBefore(Text& text, Mouse& mouse, MyWindow& myWin, int& indexCount, int& startLineNumberInConsole);
+int pasteAfter(Text& text, Mouse& mouse, string pasteContent);
+int pasteBefore(Text& text, Mouse& mouse, string pasteContent, MyWindow& myWin, int& indexCount, int& startLineNumberInConsole);
 
 void save(Text& text, const string file);
 void captureInput(bool& status, queue<int>& queueInput);
