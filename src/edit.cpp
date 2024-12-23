@@ -26,10 +26,7 @@ int main(int argc, char* argv[]){
         cout<<"parameters too much!"<<endl;
         return -1;
     }
-
-    if(editFile(text, file)){
-        save(text, file);
-    }
+    editFile(text, file);
     return 0;
 }
 
