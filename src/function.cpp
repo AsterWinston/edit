@@ -1,5 +1,5 @@
 #include"function.h"
-
+//
 int initEdit(vector<string>& v, Text& text, string& file){
     stringReplace(v[0], "\\", "\\\\");
     stringReplace(v[1], "\\", "\\\\");
@@ -55,7 +55,7 @@ void stringReplace(string& source, const string str1, const string str2){
         pos+=str2.length();
     }
 }
-
+//
 int getIndexCount(Text& text){
     int line_count = text.v->size();
     int index_count = 1;
@@ -87,8 +87,8 @@ int getIndexOfNumber(int number){
     while(number = number/10)temp++;
     return temp;
 }
-
-void initLineInfo(const Text& text, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, const MyWindow& myWin, const int& indexCount, const int& startLineNumberInText){
+//
+void initLineInfo(const Text& text, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, const MyWindow& myWin, const int& indexCount, int startLineNumberInText){
     vectorLineCount.resize((*text.v).size());
     vectorLineNumber.resize((*text.v).size()+1);
     vectorLineNumber[0]=1;
@@ -98,7 +98,7 @@ void initLineInfo(const Text& text, vector<int>& vectorLineNumber, vector<int>& 
     }
     vectorLineNumber.pop_back();
 }
-
+//
 void showUI(HANDLE& hConsole, const Text& text, const Mouse& mouse, const MyWindow& myWin, const vector<int>& vectorLineNumber, const vector<int>& vectorLineCount, const string bottomContent, const int& startLineNumberInConsole, const int& indexCount){
     //隐藏光标
     CONSOLE_CURSOR_INFO cursorInfo;
@@ -180,7 +180,7 @@ void showBottomInfo(HANDLE& hConsole, Mouse& mouse, MyWindow& myWin, string bott
     setCursorPosition(hConsole, myWin.wide - (getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + 1), myWin.height - 1);
     cout<<mouse.getY()+1<<','<<mouse.getX()+1;
 }
-
+//
 void setCursorPosition(HANDLE& hConsole, const int x, const int y){
     COORD cursorPosition;
     cursorPosition.X = x;
@@ -193,8 +193,9 @@ void resetCursor(HANDLE& hConsole){
         GetConsoleCursorInfo(hConsole, &cursorInfo);
         cursorInfo.bVisible = true;
         SetConsoleCursorInfo(hConsole, &cursorInfo);
+        cout << "\x1b[0 q";
 }
-
+//
 void captureInput(bool& status, queue<int>& queueInput){
     int temp;
     while(status){
@@ -226,7 +227,7 @@ void processWindowChange(bool& status, HANDLE& hConsole, Text& text, MyWindow& m
         }
     }
 }
-
+//
 int moveUp(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& myWin, Mode& mode, string bottomContent, int& indexCount, int& startLineNumberInConsole){
     if(mouse.getY() == 0){
         return 0;
@@ -283,7 +284,6 @@ int moveDown(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<int
 int moveLeft(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& myWin, string bottomContent, int indexCount, int& startLineNumberInConsole){
     int startLineNumberRecord = startLineNumberInConsole;
     if(mouse.getX()==0){
-        cout<<'\7';
         return 0;
     }
     mouse.renewX(mouse.getX()-1);
@@ -416,7 +416,7 @@ int deleteCharBefore(Text& text, Mouse& mouse, MyWindow& myWin, int& indexCount,
         }
         else{
             //合并行
-            mouse.renewPos((*text.v)[mouse.getY()].size(), mouse.getY());
+            mouse.renewPos((*text.v)[mouse.getY()-1].size(), mouse.getY()-1);
             for(int i=0;i<(*text.v)[mouse.getY()+1].size();i++)(*text.v)[mouse.getY()].push_back((*text.v)[mouse.getY()+1][i]);
             for(int i=mouse.getY()+1;i<(*text.v).size()-1;i++){
                 (*text.v)[i] = (*text.v)[i+1];
@@ -431,7 +431,7 @@ int deleteCharBefore(Text& text, Mouse& mouse, MyWindow& myWin, int& indexCount,
     for(int i=mouse.getX()-1;i<(*text.v)[indexTemp].size()-1;i++){
         (*text.v)[indexTemp][i]=(*text.v)[indexTemp][i+1];
     }
-    (*text.v).resize((*text.v)[indexTemp].size()-1);
+    (*text.v)[indexTemp].resize((*text.v)[indexTemp].size()-1);
     if(!(mouse.getX()%(myWin.wide-indexCount-1)))startLineNumberInConsole=startLineNumberInConsole>1?startLineNumberInConsole-1:1;
     mouse.renewX(mouse.getX()-1);
     return 1;
@@ -465,7 +465,7 @@ int pasteBefore(Text& text, Mouse& mouse, string pasteContent, MyWindow& myWin, 
         (*text.v)[mouse.getY()]=temp;
         //更新startLineNumber
         if(pasteContent.size()>myWin.wide-indexCount-2-mouse.getX()%(myWin.wide-indexCount-1)){
-            startLineNumberInConsole = startLineNumberInConsole+(pasteContent.size()-(myWin.wide-indexCount-2-mouse.getX()%(myWin.wide-indexCount-1))+myWin.wide-indexCount-1-1)%(myWin.wide-indexCount-1);
+            startLineNumberInConsole = startLineNumberInConsole+(pasteContent.size()-(myWin.wide-indexCount-2-mouse.getX()%(myWin.wide-indexCount-1))+myWin.wide-indexCount-2)%(myWin.wide-indexCount-1);
         }
         mouse.renewX(mouse.getX()+pasteContent.size());
         return 1;
@@ -476,7 +476,7 @@ int pasteBefore(Text& text, Mouse& mouse, string pasteContent, MyWindow& myWin, 
     }
     mouse.renewX(pasteContent.size()-1);
     //更新startLineNumber
-    startLineNumberInConsole=startLineNumberInConsole+(pasteContent.size()-myWin.wide+indexCount)/(myWin.wide-indexCount-1)-1;
+    startLineNumberInConsole=startLineNumberInConsole+(pasteContent.size()+myWin.wide-indexCount-2)/(myWin.wide-indexCount-1)-1;
     return 1;
 }
 int charReplace(Text& text, Mouse& mouse, char ch){
@@ -511,7 +511,7 @@ int deleteLineAfter(Text& text, Mouse& mouse, MyWindow& myWin, int& indexCount, 
     }
     (*text.v)[mouse.getY()].resize(mouse.getX());
     if(!((mouse.getX()+myWin.wide+indexCount-1)%(myWin.wide-indexCount-1)))startLineNumberInConsole=startLineNumberInConsole>1?startLineNumberInConsole-1:1;
-    mouse.renewX(mouse.getX()-1);
+    mouse.renewX(mouse.getX()>0?mouse.getX()-1:0);
     return 1;
 }
 int deleteLineBefore(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& myWin, string bottomContent, int& indexCount, int& startLineNumberInConsole){
@@ -519,7 +519,7 @@ int deleteLineBefore(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, My
         return 0;
     }
     for(int i=mouse.getX();i<(*text.v)[mouse.getY()].size()-1;i++){
-        (*text.v)[mouse.getY()][i-mouse.getX()]=(*text.v)[mouse.getY()][i];        
+        (*text.v)[mouse.getY()][i-mouse.getX()]=(*text.v)[mouse.getY()][i+1];        
     }
     (*text.v)[mouse.getY()].resize((*text.v)[mouse.getY()].size()-mouse.getX()-1);
     mouse.renewX(0);
@@ -542,7 +542,7 @@ int insertChar(Text& text, Mouse& mouse, char ch, MyWindow& myWin, int& indexCou
     }
     if(!((mouse.getX()+1)%(myWin.wide-indexCount-1)))startLineNumberInConsole+=1;
     (*text.v)[mouse.getY()].resize((*text.v)[mouse.getY()].size()+1);
-    for(int i=(*text.v)[mouse.getY()].size();i>mouse.getX();i--){
+    for(int i=(*text.v)[mouse.getY()].size()-1;i>mouse.getX();i--){
         (*text.v)[mouse.getY()][i]=(*text.v)[mouse.getY()][i-1];
     }
     (*text.v)[mouse.getY()][mouse.getX()]=ch;
@@ -554,9 +554,10 @@ void enterKey(Text& text, Mouse& mouse, int& startLineNumberInConsole, int& inde
     for(int i=mouse.getX();i<(*text.v)[mouse.getY()].size();i++){
         temp.push_back((*text.v)[mouse.getY()][i]);
     }
+    (*text.v)[mouse.getY()].resize(mouse.getX());
     (*text.v).resize((*text.v).size()+1);
-    indexCount = getIndexCount(text);
-    for(int i=(*text.v).size();i>mouse.getY()+1;i--){
+    indexCount = getIndexOfNumber((*text.v).size());
+    for(int i=(*text.v).size()-1;i>mouse.getY()+1;i--){
         (*text.v)[i]=(*text.v)[i-1];
     }
     (*text.v)[mouse.getY()+1]=temp;
@@ -564,7 +565,7 @@ void enterKey(Text& text, Mouse& mouse, int& startLineNumberInConsole, int& inde
     startLineNumberInConsole+=1;
 }
 
-int undoOneStep(Text& text, OperationStack& opstk){
+int undoOneStep(Text& text, Mouse& mouse, OperationStack& opstk){
     if(opstk.empty()){
         return 0;
     }
@@ -578,21 +579,24 @@ int undoOneStep(Text& text, OperationStack& opstk){
             for(int i=0;i<oso.str.size();i++)temp.push_back(oso.str[i]);
             for(int i=oso.pos.getX();i<(*text.v)[oso.pos.getY()].size();i++)temp.push_back((*text.v)[oso.pos.getY()][i]);
             (*text.v)[oso.pos.getY()]=temp;
+            mouse.renewPos(oso.pos.getX(), oso.pos.getY());
             break;
         }      
         case operate::dele:
         {
-            for(int i=oso.pos.getX();i<oso.str.size()-1;i++)(*text.v)[oso.pos.getY()][i]=(*text.v)[oso.pos.getY()][i+1];
+            for(int i=oso.pos.getX();i<(*text.v)[oso.pos.getY()].size()-1;i++)(*text.v)[oso.pos.getY()][i]=(*text.v)[oso.pos.getY()][i+1];
             (*text.v)[oso.pos.getY()].resize((*text.v)[oso.pos.getY()].size()-oso.str.size());
+            mouse.renewPos(oso.pos.getX()>0?oso.pos.getX()-1:0, oso.pos.getY());
             break;
         }
         case operate::repl:
             for(int i=0;i<oso.str.size();i++)(*text.v)[oso.pos.getY()][oso.pos.getX()+i]=oso.str[i];
+            mouse.renewPos(mouse.getX(), mouse.getY());
             break;
     }
     return 1;
 }
-int undoAllStep(Text& text, OperationStack& opstk){
+int undoAllStep(Text& text, Mouse& mouse, OperationStack& opstk){
     if(opstk.empty()){
         return 0;
     }
@@ -608,16 +612,19 @@ int undoAllStep(Text& text, OperationStack& opstk){
                 for(int i=0;i<oso.str.size();i++)temp.push_back(oso.str[i]);
                 for(int i=oso.pos.getX();i<(*text.v)[oso.pos.getY()].size();i++)temp.push_back((*text.v)[oso.pos.getY()][i]);
                 (*text.v)[oso.pos.getY()]=temp;
+                mouse.renewPos(oso.pos.getX(), oso.pos.getY());
                 break;
             }      
             case operate::dele:
             {
-                for(int i=oso.pos.getX();i<oso.str.size()-1;i++)(*text.v)[oso.pos.getY()][i]=(*text.v)[oso.pos.getY()][i+1];
+                for(int i=oso.pos.getX();i<(*text.v)[oso.pos.getY()].size()-1;i++)(*text.v)[oso.pos.getY()][i]=(*text.v)[oso.pos.getY()][i+1];
                 (*text.v)[oso.pos.getY()].resize((*text.v)[oso.pos.getY()].size()-oso.str.size());
+                mouse.renewPos(oso.pos.getX()>0?oso.pos.getX()-1:0, oso.pos.getY());
                 break;
             }
             case operate::repl:
                 for(int i=0;i<oso.str.size();i++)(*text.v)[oso.pos.getY()][oso.pos.getX()+i]=oso.str[i];
+                mouse.renewPos(mouse.getX(), mouse.getY());
                 break;
         }
     }    
@@ -626,16 +633,16 @@ int undoAllStep(Text& text, OperationStack& opstk){
 
 int searchDestination(Text& text, string destination, vector<Position>& searchResult){
     searchResult.resize(0);
-    int xLast, xNew ,y;
+    int xLast, xNew;
     for(int i=0;i<(*text.v).size();i++){
-        y=i;
         xLast=-1;
         vector<char> temp = (*text.v)[i];
-        while((xNew=KMPSearch(temp, destination))!=temp.size()){
-            searchResult.push_back({xNew+xLast+1, y});
-            xLast = xNew;
+        if(!temp.size())continue;
+        while(temp.size()>=destination.size() && (xNew=KMPSearch(temp, destination))!=temp.size()){
+            ++xLast += xNew;
+            searchResult.push_back({xLast, i});
             temp.resize(0);
-            for(int j=xLast+1;i<(*text.v)[i].size();j++){
+            for(int j=xLast+1;j<(*text.v)[i].size();j++){
                 temp.push_back((*text.v)[i][j]);
             }
         }
@@ -647,16 +654,15 @@ int searchNext(vector<Position>& result, Text& text, Mouse& mouse, vector<int>& 
     Position tempPos;
     int flag=0;
     for(auto i:result){
-        if(i.getY()>=mouse.getY()&&i.getX()>mouse.getX()){
+        if(i.getY()==mouse.getY()&&i.getX()>mouse.getX()||i.getY()>mouse.getY()){
             tempPos=i;
             flag=1;
             break;
         }
     }
-    if(!flag){
-        return 0;
-    }
-    mouse.renewPos(tempPos.getX(),tempPos.getY());
+    if(!flag)return 0;
+    mouse.renewPos(tempPos.getX(), tempPos.getY());
+
     int startLineNumberRecord = startLineNumberInConsole;
     Position posInConsole = fromMouseToConsole(mouse, myWin, indexCount, startLineNumberInConsole, vectorLineNumber);
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
@@ -676,9 +682,10 @@ int searchLast(vector<Position>& result, Text& text, Mouse& mouse, vector<int>& 
     Position tempPos;
     int flag=0;
     for(int i=result.size()-1;i>=0;i--){
-        if(result[i].getY()<=mouse.getY()&&result[i].getX()<mouse.getX()){
-            tempPos = result[i];
+        if(result[i].getY()==mouse.getY()&&result[i].getX()<mouse.getX()||result[i].getY()<mouse.getY()){
+            tempPos=result[i];
             flag=1;
+            break;
         }
     }
     if(!flag){
@@ -849,6 +856,8 @@ int editFile(Text& text, const string file){
     string pasteContent = "";//复制的内容
     //
     string destination = "";
+    //
+    int tempLineNumber;
 
     initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
     system("cls");
@@ -1137,8 +1146,7 @@ int editFile(Text& text, const string file){
                                             searchResult->resize(0);
                                         }
                                         if(pasteAfter(text, mouse, pasteContent)){
-                                            contentChangeFlag=1;
-                                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, mouse.getY());
                                             bottomContent = "pasted after";
                                             system("cls");
                                             showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
@@ -1182,8 +1190,8 @@ int editFile(Text& text, const string file){
                                             searchResult->resize(0);
                                         }
                                         if(deleteCharHere(text, mouse, myWin, mode, indexCount, startLineNumberInConsole)){
-                                            //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, mouse.getY());
-                                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, mouse.getY());
+                                            //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
                                             bottomContent = "";
                                             system("cls");
                                             showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
@@ -1196,11 +1204,12 @@ int editFile(Text& text, const string file){
                                         showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
                                         break;
                                     case 'u':
-                                        if(undoOneStep(text, *opstk)){
+                                        if(!opstk->empty())tempLineNumber=opstk->top().pos.getY();
+                                        if(undoOneStep(text, mouse, *opstk)){
                                             contentChangeFlag=1;
                                             searchResult->resize(0);
-                                            //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, opstk.top().pos.getY());
-                                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, tempLineNumber);
+                                            //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
                                             bottomContent = "undid one step";
                                             system("cls");
                                             showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
@@ -1213,11 +1222,12 @@ int editFile(Text& text, const string file){
                                         showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
                                         break;
                                     case 'U':
-                                        if(undoAllStep(text, *opstk)){
+                                        if(!opstk->empty())tempLineNumber=opstk->top().pos.getY();
+                                        if(undoAllStep(text, mouse, *opstk)){
                                             contentChangeFlag=1;
                                             searchResult->resize(0);
-                                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, opstk->top().pos.getY());
-                                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, tempLineNumber);
+                                            //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
                                             bottomContent = "undid all step";
                                             system("cls");
                                             showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
@@ -1316,6 +1326,7 @@ int editFile(Text& text, const string file){
                                     }
                                     if(charReplace(text, mouse, tempInput)){
                                         system("cls");
+                                        bottomContent="";
                                         showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
                                     }
                                     else{
@@ -1359,7 +1370,7 @@ int editFile(Text& text, const string file){
                                                     searchResult->resize(0);
                                                 }
                                                 if(deleteLineHere(text, mouse, *vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                                    initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                                                    initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, mouse.getY());
                                                     bottomContent = "deleted this line";
                                                     system("cls");
                                                     showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
@@ -1405,7 +1416,7 @@ int editFile(Text& text, const string file){
                                                     searchResult->resize(0);
                                                 }
                                                 if(deleteLineAfter(text, mouse, myWin, indexCount, startLineNumberInConsole)){
-                                                    initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                                                    initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, mouse.getY());
                                                     bottomContent = "deleted this line after";
                                                     system("cls");
                                                     showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
@@ -1444,7 +1455,7 @@ int editFile(Text& text, const string file){
                                                     searchResult->resize(0);
                                                 }
                                                 if(deleteLineBefore(text, mouse, *vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                                    initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                                                    initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, mouse.getY());
                                                     bottomContent = "deleted this line after";
                                                     system("cls");
                                                     showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
@@ -1580,7 +1591,7 @@ int editFile(Text& text, const string file){
                                 for(int i=1;i<commandInput.size();i++)destination.push_back(commandInput[i]);
                                 commandInput="";
                                 if(searchDestination(text, destination, *searchResult)){
-                                    bottomContent="search finished";
+                                    bottomContent="search finished, found " + std::to_string(searchResult->size()) + " items";
                                 }
                                 else{
                                     cout<<'\7';
@@ -1703,15 +1714,17 @@ int editFile(Text& text, const string file){
                                     showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
                                     break;
                                 case 83://delete
-                                    if((*text.v)[mouse.getY()].size())opstk->pushBack(string(1, (*text.v)[mouse.getY()][mouse.getX()]), operate::add, {mouse.getX(), mouse.getY()});
-                                        if(deleteCharHere(text, mouse, myWin, mode, indexCount, startLineNumberInConsole)){
-                                            contentChangeFlag=1;
-                                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
+                                    if((*text.v)[mouse.getY()].size() && mouse.getX() != (*text.v)[mouse.getY()].size()){
+                                        opstk->pushBack(string(1, (*text.v)[mouse.getY()][mouse.getX()]), operate::add, {mouse.getX(), mouse.getY()});
+                                        contentChangeFlag=1;
+                                    }
+                                    if(deleteCharHere(text, mouse, myWin, mode, indexCount, startLineNumberInConsole)){
+                                        initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, mouse.getY());
+                                        system("cls");
+                                        showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
+                                    }
+                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
+                                    showCursor(hConsole, mouse, myWin, *vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
                                     break;
                                 case 72://上
                                     if(returnFlag = moveUp(text, mouse, *vectorLineNumber, myWin, mode, bottomContent, indexCount, startLineNumberInConsole)){
@@ -1762,9 +1775,10 @@ int editFile(Text& text, const string file){
                         else if(tempInput >= 32 && tempInput <= 126){
                             opstk->pushBack(string(1, tempInput), operate::dele, {mouse.getX(), mouse.getY()});
                             contentChangeFlag=1;
+                            searchResult->resize(0);
                             if(insertChar(text, mouse, tempInput, myWin, indexCount, startLineNumberInConsole)){
-                                //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, mouse.getY());
-                                initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                                initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, mouse.getY());
+                                //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
                             }
                             system("cls");
                             showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
@@ -1782,7 +1796,9 @@ int editFile(Text& text, const string file){
                         //backspace
                         else if(tempInput == 8){
                             if(mouse.getX() == 0 && mouse.getY() != 0){
+                                //合并行
                                 opstk->clear();
+                                contentChangeFlag=1;
                             }
                             else if(mouse.getX()!=0){
                                 opstk->pushBack(string(1, (*text.v)[mouse.getY()][mouse.getX()-1]), operate::add, {mouse.getX()-1, mouse.getY()});
@@ -1790,8 +1806,8 @@ int editFile(Text& text, const string file){
                                 searchResult->resize(0);
                             }
                             if(deleteCharBefore(text, mouse, myWin, indexCount, startLineNumberInConsole)){
-                                //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, mouse.getY()-1);
-                                initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                                initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, mouse.getY()-1);
+                                //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
                                 contentChangeFlag=1;
                                 system("cls");
                                 showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
@@ -1802,11 +1818,12 @@ int editFile(Text& text, const string file){
                         //'\n'
                         else if(tempInput == 13){
                             enterKey(text, mouse, startLineNumberInConsole, indexCount);
+                            //重开行
                             opstk->clear();
                             contentChangeFlag=1;
                             searchResult->resize(0);
-                            //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, mouse.getY());
-                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                            initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, mouse.getY()-1);
+                            //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
                             system("cls");
                             showUI(hConsole, text, mouse, myWin, *vectorLineNumber, *vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
                             showBottomInfo(hConsole, mouse, myWin, bottomContent);
@@ -1820,9 +1837,11 @@ int editFile(Text& text, const string file){
                 break;
         }
     }
-
     getInputsStatus = false;
     handleWinVarStatus = false;
+    //如果不等待结束子线程后释放资源，导致共享的资源释放出问题
+    capInput.join();
+    handleWinVar.join();
     resetCursor(hConsole);
     system("cls");
     delete opstk;
@@ -1831,5 +1850,3 @@ int editFile(Text& text, const string file){
     delete searchResult;
     return 1;
 }
-  
-

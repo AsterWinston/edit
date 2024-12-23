@@ -24,23 +24,23 @@ Mouse::~Mouse(){
 }
 
 void OperationStack::pushBack(string str, operate opr, Position pos){
-    if(pos.getY()!=stk->top().pos.getY())this->clear();
-    stk->push({str, opr, pos});
+    if(!this->stk->empty()&&pos.getY()!=this->stk->top().pos.getY())this->clear();
+    this->stk->push({str, opr, pos});
 }
 void OperationStack::clear(){
-    while(!stk->empty())stk->pop();
+    while(!this->stk->empty())stk->pop();
 }
 void OperationStack::popBack(){
-    stk->pop();
+    this->stk->pop();
 }
 oneStepOperation OperationStack::top(){
-    return stk->top();
+    return this->stk->top();
 }
 bool OperationStack::empty(){
-    return stk->empty();
+    return this->stk->empty();
 }
 OperationStack::~OperationStack(){
-    cout<<"destructing OperationStack"<<endl;
+    //cout<<"destructing OperationStack"<<endl;
     if(this->stk)delete this->stk;
     this->stk=nullptr;
     //cout<<"finish destrction of Opstk"<<endl;

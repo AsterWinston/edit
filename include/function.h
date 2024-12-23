@@ -32,7 +32,7 @@ Position fromMouseToConsole(const Mouse& mouse, const MyWindow& myWin, const int
 int getLineNumberInText(const int& lineNumberInConsole, const vector<int>& vectorLineNumber);
 int getIndexOfNumber(int number);
 
-void initLineInfo(const Text& text, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, const MyWindow& myWin, const int& indexCount, const int& startLineNumberInText);
+void initLineInfo(const Text& text, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, const MyWindow& myWin, const int& indexCount, int startLineNumberInText);
 
 void showUI(HANDLE& hConsole, const Text& text, const Mouse& mouse, const MyWindow& myWin, const vector<int>& vectorLineNumber, const vector<int>& vectorLineCount, const string bottomContent, const int& startLineNumberInConsole, const int& indexCount);
 void showCursor(HANDLE& hConsole, const Mouse& mouse, const MyWindow& myWin, const vector<int>& vectorLineNumber, const Mode& mode, const string bottomContent, const int& startLineNumberInConsole, const int& indexCount);
@@ -66,8 +66,8 @@ int deleteLineBefore(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, My
 int insertChar(Text& text, Mouse& mouse, char ch, MyWindow& myWin, int& indexCount, int& startLineNumberInConsole);
 void enterKey(Text& text, Mouse& mouse, int& startLineNumberInConsole, int& indexCount);
 
-int undoOneStep(Text& text, OperationStack& opstk);
-int undoAllStep(Text& text, OperationStack& opstk);
+int undoOneStep(Text& text, Mouse& mouse, OperationStack& opstk);
+int undoAllStep(Text& text, Mouse& mouse, OperationStack& opstk);
 
 int searchDestination(Text& text, string destination, vector<Position>& searchResult);
 int searchNext(vector<Position>& result, Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, MyWindow& myWin, string bottomContent, int& indexCount, int& startLineNumberInConsole);
