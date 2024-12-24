@@ -870,6 +870,7 @@ int editFile(Text& text, const string file){
         switch (mode){
             case Mode::command:
                 while(runStatus){
+                    Sleep(10);//减少CPU资源浪费
                     if(!queueInput.empty()){
                         tempInput = queueInput.front();
                         queueInput.pop();
@@ -1591,7 +1592,8 @@ int editFile(Text& text, const string file){
                                 for(int i=1;i<commandInput.size();i++)destination.push_back(commandInput[i]);
                                 commandInput="";
                                 if(searchDestination(text, destination, *searchResult)){
-                                    bottomContent="search finished, found " + std::to_string(searchResult->size()) + " items";
+                                    string item = searchResult->size()>1?" items":" item";
+                                    bottomContent="search finished, found " + std::to_string(searchResult->size()) + item;
                                 }
                                 else{
                                     cout<<'\7';
@@ -1664,6 +1666,7 @@ int editFile(Text& text, const string file){
             case Mode::insert:
                 bottomContent="--insert--";
                 while(runStatus){
+                    Sleep(10);//如果没有，会导致占用大量的CPU资源
                     if(!queueInput.empty()){
                         tempInput = queueInput.front();
                         queueInput.pop();
