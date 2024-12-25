@@ -108,13 +108,12 @@ void showUI(HANDLE& hConsole, const Text& text, const Mouse& mouse, const MyWind
     //信息栏
     int lineNumberInText = 0;
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
+    SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_INTENSITY);//蓝色字体
     for(int i = startLineNumberInConsole; i < myWin.height + startLineNumberInConsole - bottomLineCount && i <= vectorLineNumber[vectorLineNumber.size()-1] + vectorLineCount[vectorLineCount.size()-1] - 1; i++){
         setCursorPosition(hConsole, 0, i - startLineNumberInConsole);
         if((lineNumberInText = getLineNumberInText(i, vectorLineNumber))){
             for(int j=0;j<indexCount - getIndexOfNumber(lineNumberInText);j++)cout<<' ';
-            SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
             cout<<lineNumberInText;
-            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
             cout<<' ';
         }
         else {
@@ -123,6 +122,7 @@ void showUI(HANDLE& hConsole, const Text& text, const Mouse& mouse, const MyWind
             }
         }
     }
+    SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
     //内容
     int tempLineNumber = startLineNumberInConsole, count = 0;
     while(!(lineNumberInText = getLineNumberInText(tempLineNumber--, vectorLineNumber)))count++;
@@ -535,19 +535,36 @@ int deleteLineBefore(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, My
     return 2;
 }
 int insertChar(Text& text, Mouse& mouse, char ch, MyWindow& myWin, int& indexCount, int& startLineNumberInConsole){
-    if((*text.v)[mouse.getY()].size()==0){
-        (*text.v)[mouse.getY()].push_back(ch);
+    if(ch==9){
+        if((*text.v)[mouse.getY()].size()==0){
+            for(int i=0;i<4;i++)(*text.v)[mouse.getY()].push_back(' ');
+            mouse.renewX(mouse.getX()+4);
+            return 0;
+        }
+        if((mouse.getX()+1)%(myWin.wide-indexCount-1)>(myWin.wide-indexCount-5)||!((mouse.getX()+1)%(myWin.wide-indexCount-1)))startLineNumberInConsole+=1;
+        (*text.v)[mouse.getY()].resize((*text.v)[mouse.getY()].size()+4);
+        for(int i=(*text.v)[mouse.getY()].size()-1;i>mouse.getX()+3;i--){
+            (*text.v)[mouse.getY()][i]=(*text.v)[mouse.getY()][i-4];
+        }
+        for(int i=0;i<4;i++)(*text.v)[mouse.getY()][mouse.getX()+i]=' ';
+        mouse.renewX(mouse.getX()+4);
+        return 1;
+    }
+    else{
+        if((*text.v)[mouse.getY()].size()==0){
+            (*text.v)[mouse.getY()].push_back(ch);
+            mouse.renewX(mouse.getX()+1);
+            return 0;
+        }
+        if(!((mouse.getX()+1)%(myWin.wide-indexCount-1)))startLineNumberInConsole+=1;
+        (*text.v)[mouse.getY()].resize((*text.v)[mouse.getY()].size()+1);
+        for(int i=(*text.v)[mouse.getY()].size()-1;i>mouse.getX();i--){
+            (*text.v)[mouse.getY()][i]=(*text.v)[mouse.getY()][i-1];
+        }
+        (*text.v)[mouse.getY()][mouse.getX()]=ch;
         mouse.renewX(mouse.getX()+1);
-        return 0;
+        return 1;
     }
-    if(!((mouse.getX()+1)%(myWin.wide-indexCount-1)))startLineNumberInConsole+=1;
-    (*text.v)[mouse.getY()].resize((*text.v)[mouse.getY()].size()+1);
-    for(int i=(*text.v)[mouse.getY()].size()-1;i>mouse.getX();i--){
-        (*text.v)[mouse.getY()][i]=(*text.v)[mouse.getY()][i-1];
-    }
-    (*text.v)[mouse.getY()][mouse.getX()]=ch;
-    mouse.renewX(mouse.getX()+1);
-    return 1;
 }
 void enterKey(Text& text, Mouse& mouse, int& startLineNumberInConsole, int& indexCount){
     vector<char> temp;
@@ -1775,8 +1792,8 @@ int editFile(Text& text, const string file){
                             }
                         }
                         //普通可显示字符
-                        else if(tempInput >= 32 && tempInput <= 126){
-                            opstk->pushBack(string(1, tempInput), operate::dele, {mouse.getX(), mouse.getY()});
+                        else if(tempInput >= 32 && tempInput <= 126 || tempInput == 9){
+                            opstk->pushBack(tempInput==9?string(4, ' '):string(1, tempInput), operate::dele, {mouse.getX(), mouse.getY()});
                             contentChangeFlag=1;
                             searchResult->resize(0);
                             if(insertChar(text, mouse, tempInput, myWin, indexCount, startLineNumberInConsole)){
