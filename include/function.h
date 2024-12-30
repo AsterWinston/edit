@@ -15,9 +15,7 @@ using std::fstream;
 #include<conio.h>
 #include<thread>
 using std::thread;
-#include<mutex>
 #include<queue>
-#include<atomic>
 using std::queue;
 
 enum class Mode{command, insert};
