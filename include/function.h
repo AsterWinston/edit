@@ -40,7 +40,7 @@ void setCursorPosition(HANDLE& hConsole, const int x, const int y);
 void resetCursor(HANDLE& hConsole);
 
 void captureInput(bool& status, queue<int>& queueInput);
-void processWindowChange(bool& status, HANDLE& hConsole, Text& text, MyWindow& myWin, vector<int>* vectorLineNumber, vector<int>* vectorLineCount, Mouse& mouse, Mode& mode, string& bottomContent, int& startLineNumberInConsole, int& indexCount);
+void processWindowChange(bool& status, HANDLE& hConsole, Text& text, MyWindow& myWin, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, Mouse& mouse, Mode& mode, string& bottomContent, int& startLineNumberInConsole, int& indexCount);
 
 int moveUp(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& myWin, Mode& mode, string bottomContent, int& indexCount, int& startLineNumberInConsole);
 int moveDown(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, MyWindow& myWin, Mode& mode, string bottomContent, int& indexCount, int& startLineNumberInConsole);
