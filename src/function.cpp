@@ -31,10 +31,12 @@ string commandInput;//记录命令
 //子线程自动更新
 queue<int> queueInput;//记录输入
 //
-vector<Position>* searchResult;//记录查找结果
+//vector<Position>* searchResult;//记录查找结果
+std::unique_ptr<vector<Position>> searchResult;
 //
 // bool LastCharIsspecial = 0;//记录是遇到0或者224但是queueInput为空，即特殊键输入还没有完全入队
-std::atomic<bool> runStatus = true, getInputsStatus = true, handleWinVarStatus = true;
+std::atomic<bool> getInputStatus = true, handleWinVarStatus = true;
+bool runStatus = true;
 //
 int returnFlag;//记录函数返回值
 //
@@ -246,7 +248,7 @@ void resetCursor(){
 //
 void captureInput(){
     int temp;
-    while(getInputsStatus){
+    while(getInputStatus){
         Sleep(10);
         if(_kbhit()){
             std::lock_guard<std::mutex> lock(mtx);
@@ -887,7 +889,7 @@ int editFile(){
     mode=Mode::command;
     myWin = getMyWindow();
     indexCount = getIndexCount();
-    searchResult = new vector<Position>;
+    searchResult = std::make_unique<vector<Position>>();
     initLineInfo(0);
     clear();
     showUI();
@@ -985,14 +987,13 @@ int editFile(){
                 break;
         }
     }
-    getInputsStatus = false;
+    getInputStatus = false;
     handleWinVarStatus = false;
     //如果不等待结束子线程后释放资源，导致共享的资源释放出问题
     capInput.join();
     handleWinVar.join();
     resetCursor();
     clear();
-    delete searchResult;
     return 1;
 }
 
@@ -1012,7 +1013,6 @@ void echoOff(){
 }
 
 void commandSpecialChar(){
-
     switch(input){
         case 73://pgup
             if(pageUp()){
