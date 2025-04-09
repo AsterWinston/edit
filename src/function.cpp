@@ -1,5 +1,9 @@
 #include"function.h"
 //
+#include<mutex>
+#include <string>
+std::mutex mtx;
+
 int initEdit(vector<string>& v, Text& text, string& file){
     stringReplace(v[0], "\\", "\\\\");
     stringReplace(v[1], "\\", "\\\\");
@@ -201,6 +205,7 @@ void captureInput(bool& status, queue<int>& queueInput){
     while(status){
         Sleep(10);
         if(_kbhit()){
+            std::lock_guard<std::mutex> lock(mtx);
             temp=_getch();
             queueInput.push(temp);
             if(temp==0||temp==224){
@@ -836,6 +841,7 @@ int editFile(Text& text, const string file){
 	GetConsoleMode(stdIn, &consoleMode);
 	SetConsoleMode(stdIn, consoleMode & ~ENABLE_ECHO_INPUT);
     //不变量
+    
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);//窗口输出句柄
     //
     int startLineNumberInConsole = 1;//开始输出的行数
@@ -860,7 +866,7 @@ int editFile(Text& text, const string file){
     //
     vector<Position>* searchResult = new vector<Position>;//记录查找结果
     //
-    bool LastCharIsspecial = 0;//记录是遇到0或者224但是queueInput为空，即特殊键输入还没有完全入队
+    // bool LastCharIsspecial = 0;//记录是遇到0或者224但是queueInput为空，即特殊键输入还没有完全入队
     //
     bool runStatus = true, getInputsStatus = true, handleWinVarStatus = true;
     //
@@ -888,22 +894,29 @@ int editFile(Text& text, const string file){
             case Mode::command:
                 while(runStatus){
                     Sleep(10);//减少CPU资源浪费
+                    // std::lock_guard<std::mutex> lock(mtx);
+                    mtx.lock();
                     if(!queueInput.empty()){
                         tempInput = queueInput.front();
                         queueInput.pop();
-                        if(LastCharIsspecial)goto specialChar01;//上一个是0或者224
+                        mtx.unlock();
+                        //if(LastCharIsspecial)goto specialChar01;//上一个是0或者224
                         //特殊按键
                         if(tempInput == 0 || tempInput == 224){
-                            if(!queueInput.empty()){
-                                tempInput = queueInput.front();
-                                queueInput.pop();
-                            }
-                            else {
-                                LastCharIsspecial = 1;
-                                break;
-                            }
-                            specialChar01:
-                            if(LastCharIsspecial)LastCharIsspecial=0;
+                            mtx.lock();
+                            tempInput = queueInput.front();
+                            queueInput.pop();
+                            mtx.unlock();
+                            // if(!queueInput.empty()){
+                            //     tempInput = queueInput.front();
+                            //     queueInput.pop();
+                            // }
+                            // else {
+                            //     LastCharIsspecial = 1;
+                            //     break;
+                            // }
+                            // specialChar01:
+                            // if(LastCharIsspecial)LastCharIsspecial=0;
                             switch(tempInput){
                                 case 73://pgup
                                     if(pageUp(mouse, vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
@@ -1677,6 +1690,9 @@ int editFile(Text& text, const string file){
                             break;
                         }
                     }
+                    else{
+                        mtx.unlock();
+                    }
                     if(mode==Mode::insert)break;
                 }
                 break;
@@ -1684,22 +1700,29 @@ int editFile(Text& text, const string file){
                 bottomContent="--insert--";
                 while(runStatus){
                     Sleep(10);//如果没有，会导致占用大量的CPU资源
+                    // std::lock_guard<std::mutex> lock(mtx);
+                    mtx.lock();
                     if(!queueInput.empty()){
                         tempInput = queueInput.front();
                         queueInput.pop();
-                        if(LastCharIsspecial)goto labelSpecialChar02;
+                        mtx.unlock();
+                        //if(LastCharIsspecial)goto labelSpecialChar02;
                         //特殊按键
                         if(tempInput == 0|| tempInput == 224){
-                            if(!queueInput.empty()){
-                                tempInput = queueInput.front();
-                                queueInput.pop();
-                            }
-                            else {
-                                LastCharIsspecial=1;
-                                break;
-                            }
-                            labelSpecialChar02:
-                            if(LastCharIsspecial)LastCharIsspecial=0;
+                            mtx.lock();
+                            tempInput = queueInput.front();
+                            queueInput.pop();
+                            mtx.unlock();
+                            // if(!queueInput.empty()){
+                            //     tempInput = queueInput.front();
+                            //     queueInput.pop();
+                            // }
+                            // else {
+                            //     LastCharIsspecial=1;
+                            //     break;
+                            // }
+                            // labelSpecialChar02:
+                            // if(LastCharIsspecial)LastCharIsspecial=0;
                             switch(tempInput){
                                 case 73://pgup
                                     if(pageUp(mouse, vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
@@ -1792,7 +1815,7 @@ int editFile(Text& text, const string file){
                             }
                         }
                         //普通可显示字符
-                        else if(tempInput >= 32 && tempInput <= 126 || tempInput == 9){
+                        else if(tempInput >= 32 && tempInput <= 126 || tempInput == 9){      
                             opstk.pushBack(tempInput==9?string(4, ' '):string(1, tempInput), operate::dele, {mouse.getX(), mouse.getY()});
                             contentChangeFlag=1;
                             searchResult->resize(0);
@@ -1851,6 +1874,9 @@ int editFile(Text& text, const string file){
                         }
                         //其他字符
                         else cout<<'\7';
+                    }
+                    else{
+                        mtx.unlock();
                     }
                     if(mode==Mode::command)break;
                 }
