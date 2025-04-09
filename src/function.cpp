@@ -47,8 +47,7 @@ bool contentChangeFlag=0;
 string pasteContent = ""; //复制的内容
 //
 string destination = ""; 
-//
-int lineNumber;
+
 
 int initEdit(vector<string>& v){
     stringReplace(v[0], "\\", "\\\\");
@@ -633,10 +632,7 @@ void enterKey(){
     startLineNumberInConsole+=1;
 }
 
-int undoOneStep(){
-    if(opstk.empty()){
-        return 0;
-    }
+void undoOneStep(){
     oneStepOperation oso=opstk.top();
     opstk.popBack();
     switch(oso.opr){
@@ -662,12 +658,8 @@ int undoOneStep(){
             mouse.renewPos(mouse.getX(), mouse.getY());
             break;
     }
-    return 1;
 }
-int undoAllStep(){
-    if(opstk.empty()){
-        return 0;
-    }
+void undoAllStep(){
     oneStepOperation oso;
     while(!opstk.empty()){
         oso=opstk.top();
@@ -696,7 +688,6 @@ int undoAllStep(){
                 break;
         }
     }    
-    return 1;
 }
 
 int searchDestination(){
@@ -1331,8 +1322,9 @@ void commandVisibleChar(){
                 showCursor();
                 break;
             case 'u':
-                if(!opstk.empty())lineNumber=opstk.top().pos.getY();
-                if(undoOneStep()){
+                if(!opstk.empty()){
+                    int lineNumber=opstk.top().pos.getY();
+                    undoOneStep();
                     contentChangeFlag=1;
                     searchResult->resize(0);
                     initLineInfo(lineNumber);
@@ -1349,8 +1341,9 @@ void commandVisibleChar(){
                 showCursor();
                 break;
             case 'U':
-                if(!opstk.empty())lineNumber=opstk.top().pos.getY();
-                if(undoAllStep()){
+                if(!opstk.empty()){
+                    int lineNumber=opstk.top().pos.getY();
+                    undoAllStep();
                     contentChangeFlag=1;
                     searchResult->resize(0);
                     initLineInfo(lineNumber);
@@ -1930,3 +1923,4 @@ void insertCharEndLine(){
     showBottomInfo();
     showCursor();
 }
+

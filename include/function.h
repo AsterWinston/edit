@@ -91,9 +91,9 @@ int insertChar(char ch);
 void enterKey();
 //Text& text, Mouse& mouse, int& startLineNumberInConsole, int& indexCount
 
-int undoOneStep();
+void undoOneStep();
 //Text& text, Mouse& mouse, OperationStack& opstk
-int undoAllStep();
+void undoAllStep();
 //Text& text, Mouse& mouse, OperationStack& opstk
 
 int searchDestination();
