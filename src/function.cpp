@@ -1,10 +1,54 @@
 #include"function.h"
 //
 #include<mutex>
-#include <string>
+#include<string>
+#include<atomic>
+
 std::mutex mtx;
 
-int initEdit(vector<string>& v, Text& text, string& file){
+extern Text text;
+extern string file;
+//
+HANDLE hConsole;//窗口输出句柄
+//
+int startLineNumberInConsole;//开始输出的行数
+//
+Mouse mouse;//鼠标在文本中的位置
+//
+OperationStack opstk;//操作栈
+//
+Mode mode;//模式
+//
+vector<int> vectorLineNumber , vectorLineCount;//记录文本在控制台窗口下行号和行数信息
+//
+string bottomContent="";//底部显示的信息
+//子线程自动更新
+MyWindow myWin;//记录窗口大小信息
+//
+int indexCount;//记录文本最大行数的位数
+//
+string commandInput;//记录命令
+//子线程自动更新
+queue<int> queueInput;//记录输入
+//
+vector<Position>* searchResult;//记录查找结果
+//
+// bool LastCharIsspecial = 0;//记录是遇到0或者224但是queueInput为空，即特殊键输入还没有完全入队
+std::atomic<bool> runStatus = true, getInputsStatus = true, handleWinVarStatus = true;
+//
+int returnFlag;//记录函数返回值
+//
+int input;//输入
+//
+bool contentChangeFlag=0;
+//
+string pasteContent = ""; //复制的内容
+//
+string destination = ""; 
+//
+int lineNumber;
+
+int initEdit(vector<string>& v){
     stringReplace(v[0], "\\", "\\\\");
     stringReplace(v[1], "\\", "\\\\");
     stringReplace(v[1], "//", "\\\\");
@@ -60,22 +104,22 @@ void stringReplace(string& source, const string str1, const string str2){
     }
 }
 //
-int getIndexCount(Text& text){
+int getIndexCount(){
     int line_count = text.v->size();
     int index_count = 1;
     while(line_count = line_count/10)index_count++;
     return index_count;
 }
-MyWindow getMyWindow(HANDLE& hConsole){
+MyWindow getMyWindow(){
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(hConsole, &csbi);
     return {csbi.srWindow.Right - csbi.srWindow.Left + 1, csbi.srWindow.Bottom - csbi.srWindow.Top + 1};
 }
 //从0开始的坐标
-Position fromMouseToConsole(const Mouse& mouse, const MyWindow& myWin, const int& indexCount, const int& startLineNumberInConsole, const vector<int>& vectorLineNumber){
+Position fromMouseToConsole(){
     return {mouse.getX()%(myWin.wide - indexCount - 1) + indexCount + 1, vectorLineNumber[mouse.getY()] - startLineNumberInConsole + mouse.getX()/(myWin.wide - indexCount - 1)};
 }
-int getLineNumberInText(const int& lineNumberInConsole, const vector<int>& vectorLineNumber){
+int getLineNumberInText(const int lineNumberInConsole){
     int low = 0, high = vectorLineNumber.size() - 1, mid;
     //没有=就炸了
     while(low <= high){
@@ -92,7 +136,7 @@ int getIndexOfNumber(int number){
     return temp;
 }
 //
-void initLineInfo(const Text& text, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, const MyWindow& myWin, const int& indexCount, int startLineNumberInText){
+void initLineInfo(int startLineNumberInText){
     vectorLineCount.resize((*text.v).size());
     vectorLineNumber.resize((*text.v).size()+1);
     vectorLineNumber[0]=1;
@@ -103,7 +147,7 @@ void initLineInfo(const Text& text, vector<int>& vectorLineNumber, vector<int>& 
     vectorLineNumber.pop_back();
 }
 //
-void showUI(HANDLE& hConsole, const Text& text, const Mouse& mouse, const MyWindow& myWin, const vector<int>& vectorLineNumber, const vector<int>& vectorLineCount, const string bottomContent, const int& startLineNumberInConsole, const int& indexCount){
+void showUI(){
     //隐藏光标
     CONSOLE_CURSOR_INFO cursorInfo;
     GetConsoleCursorInfo(hConsole, &cursorInfo);
@@ -114,8 +158,8 @@ void showUI(HANDLE& hConsole, const Text& text, const Mouse& mouse, const MyWind
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_INTENSITY);//蓝色字体
     for(int i = startLineNumberInConsole; i < myWin.height + startLineNumberInConsole - bottomLineCount && i <= vectorLineNumber[vectorLineNumber.size()-1] + vectorLineCount[vectorLineCount.size()-1] - 1; i++){
-        setCursorPosition(hConsole, 0, i - startLineNumberInConsole);
-        if((lineNumberInText = getLineNumberInText(i, vectorLineNumber))){
+        setCursorPosition(0, i - startLineNumberInConsole);
+        if((lineNumberInText = getLineNumberInText(i))){
             for(int j=0;j<indexCount - getIndexOfNumber(lineNumberInText);j++)cout<<' ';
             cout<<lineNumberInText;
             cout<<' ';
@@ -129,9 +173,9 @@ void showUI(HANDLE& hConsole, const Text& text, const Mouse& mouse, const MyWind
     SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
     //内容
     int tempLineNumber = startLineNumberInConsole, count = 0;
-    while(!(lineNumberInText = getLineNumberInText(tempLineNumber--, vectorLineNumber)))count++;
+    while(!(lineNumberInText = getLineNumberInText(tempLineNumber--)))count++;
     for(int i = startLineNumberInConsole; i < myWin.height + startLineNumberInConsole - bottomLineCount && i <= vectorLineNumber[vectorLineNumber.size()-1] + vectorLineCount[vectorLineCount.size()-1] - 1; i++){
-        setCursorPosition(hConsole, indexCount + 1, i - startLineNumberInConsole);
+        setCursorPosition(indexCount + 1, i - startLineNumberInConsole);
         if(count < vectorLineCount[lineNumberInText-1]){
             for(int j=count*(myWin.wide - indexCount - 1); j<(count+1)*(myWin.wide - indexCount - 1) && j<(*text.v)[lineNumberInText-1].size(); j++){
                 cout<<(*text.v)[lineNumberInText-1][j];
@@ -140,17 +184,17 @@ void showUI(HANDLE& hConsole, const Text& text, const Mouse& mouse, const MyWind
         }
         else {
             count = 1;
-            lineNumberInText = getLineNumberInText(i, vectorLineNumber);
+            lineNumberInText = getLineNumberInText(i);
             for(int j = 0; j<myWin.wide - indexCount - 1 && j<(*text.v)[lineNumberInText-1].size(); j++){
                 cout<<(*text.v)[lineNumberInText-1][j];
             }
         }
     }
 }
-void showCursor(HANDLE& hConsole, const Mouse& mouse, const MyWindow& myWin, const vector<int>& vectorLineNumber, const Mode& mode, const string bottomContent, const int& startLineNumberInConsole, const int& indexCount){
+void showCursor(){
     //光标
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
-    Position mousePositionInConsole = fromMouseToConsole(mouse, myWin, indexCount, startLineNumberInConsole, vectorLineNumber);
+    Position mousePositionInConsole = fromMouseToConsole();
     if(mousePositionInConsole.getY()>myWin.height-1-bottomLineCount){
         return;
     }
@@ -159,7 +203,7 @@ void showCursor(HANDLE& hConsole, const Mouse& mouse, const MyWindow& myWin, con
         GetConsoleCursorInfo(hConsole, &cursorInfo);
         cursorInfo.bVisible = true;
         SetConsoleCursorInfo(hConsole, &cursorInfo);
-        setCursorPosition(hConsole ,mousePositionInConsole.getX(), mousePositionInConsole.getY());
+        setCursorPosition(mousePositionInConsole.getX(), mousePositionInConsole.getY());
         if(mode == Mode::command){
             cout << "\x1b[4 q";
         }
@@ -168,7 +212,7 @@ void showCursor(HANDLE& hConsole, const Mouse& mouse, const MyWindow& myWin, con
         }
     }
 }
-void showBottomInfo(HANDLE& hConsole, Mouse& mouse, MyWindow& myWin, string bottomContent){
+void showBottomInfo(){
     CONSOLE_CURSOR_INFO cursorInfo;
     GetConsoleCursorInfo(hConsole, &cursorInfo);
     cursorInfo.bVisible = false;
@@ -176,23 +220,23 @@ void showBottomInfo(HANDLE& hConsole, Mouse& mouse, MyWindow& myWin, string bott
 
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     //清空底部
-    setCursorPosition(hConsole, 0, myWin.height - bottomLineCount);
+    setCursorPosition(0, myWin.height - bottomLineCount);
     for(int i=0;i<myWin.wide*bottomLineCount;i++)cout<<' ';
     //输出底部信息
-    setCursorPosition(hConsole, 0, myWin.height - bottomLineCount);
+    setCursorPosition(0, myWin.height - bottomLineCount);
     cout<<bottomContent;
-    setCursorPosition(hConsole, myWin.wide - (getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + 1), myWin.height - 1);
+    setCursorPosition(myWin.wide - (getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + 1), myWin.height - 1);
     cout<<mouse.getY()+1<<','<<mouse.getX()+1;
 }
 //
-void setCursorPosition(HANDLE& hConsole, const int x, const int y){
+void setCursorPosition(const int x, const int y){
     COORD cursorPosition;
     cursorPosition.X = x;
     cursorPosition.Y = y;
     SetConsoleCursorPosition(hConsole, cursorPosition);
 }
-void resetCursor(HANDLE& hConsole){
-        setCursorPosition(hConsole, 0, 0);
+void resetCursor(){
+        setCursorPosition(0, 0);
         CONSOLE_CURSOR_INFO cursorInfo;
         GetConsoleCursorInfo(hConsole, &cursorInfo);
         cursorInfo.bVisible = true;
@@ -200,9 +244,9 @@ void resetCursor(HANDLE& hConsole){
         cout << "\x1b[0 q";
 }
 //
-void captureInput(bool& status, queue<int>& queueInput){
+void captureInput(){
     int temp;
-    while(status){
+    while(getInputsStatus){
         Sleep(10);
         if(_kbhit()){
             std::lock_guard<std::mutex> lock(mtx);
@@ -216,30 +260,30 @@ void captureInput(bool& status, queue<int>& queueInput){
         }
     }
 }
-void processWindowChange(bool& status, HANDLE& hConsole, Text& text, MyWindow& myWin, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, Mouse& mouse, Mode& mode, string& bottomContent, int& startLineNumberInConsole, int& indexCount){
+void processWindowChange(){
     CONSOLE_SCREEN_BUFFER_INFO csbi;//获取窗口大小信息
-    while(status){
+    while(handleWinVarStatus){
         Sleep(10);
         if(GetConsoleScreenBufferInfo(hConsole, &csbi)){
             if(myWin.wide != csbi.srWindow.Right - csbi.srWindow.Left + 1 || myWin.height != csbi.srWindow.Bottom - csbi.srWindow.Top + 1){
-                myWin = getMyWindow(hConsole);
-                initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, 0);
-                system("cls");
-                showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
+                myWin = getMyWindow();
+                initLineInfo(0);
+                clear();
+                showUI();
+                showBottomInfo();
+                showCursor();
             }
         }
     }
 }
 //
-int moveUp(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& myWin, Mode& mode, string bottomContent, int& indexCount, int& startLineNumberInConsole){
+int moveUp(){
     if(mouse.getY() == 0){
         return 0;
     }
     mouse.renewY(mouse.getY()-1);
     int startLineNumberRecord = startLineNumberInConsole;
-    Position posInConsole = fromMouseToConsole(mouse, myWin, indexCount, startLineNumberInConsole, vectorLineNumber);
+    Position posInConsole = fromMouseToConsole();
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     int gapSize = (myWin.height-1-bottomLineCount)/2>5?5:(myWin.height-1-bottomLineCount)/2;
     switch(mode){
@@ -258,13 +302,13 @@ int moveUp(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& my
     if(startLineNumberRecord!=startLineNumberInConsole)return 1;
     return 2;
 }
-int moveDown(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, MyWindow& myWin, Mode& mode, string bottomContent, int& indexCount, int& startLineNumberInConsole){
+int moveDown(){
     if(mouse.getY()==(*text.v).size()-1){
         return 0;
     }
     mouse.renewY(mouse.getY()+1);
     int startLineNumberRecord = startLineNumberInConsole;
-    Position posInConsole = fromMouseToConsole(mouse, myWin, indexCount, startLineNumberInConsole, vectorLineNumber);
+    Position posInConsole = fromMouseToConsole();
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     int gapSize = (myWin.height-1-bottomLineCount)/2>5?5:(myWin.height-1-bottomLineCount)/2;
     switch(mode){
@@ -286,13 +330,13 @@ int moveDown(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<int
     if(startLineNumberRecord!=startLineNumberInConsole)return 1;
     return 2;
 }
-int moveLeft(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& myWin, string bottomContent, int indexCount, int& startLineNumberInConsole){
+int moveLeft(){
     int startLineNumberRecord = startLineNumberInConsole;
     if(mouse.getX()==0){
         return 0;
     }
     mouse.renewX(mouse.getX()-1);
-    Position posInConsole = fromMouseToConsole(mouse, myWin, indexCount, startLineNumberInConsole, vectorLineNumber);
+    Position posInConsole = fromMouseToConsole();
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     int gapSize = (myWin.height-1-bottomLineCount)/2>5?5:(myWin.height-1-bottomLineCount)/2;
     if(posInConsole.getY()<gapSize){
@@ -301,7 +345,7 @@ int moveLeft(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& 
     if(startLineNumberRecord!=startLineNumberInConsole)return 1;
     return 2;
 }
-int moveRight(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<int>& vectorLineCount,MyWindow& myWin, Mode& mode, string bottomContent, int& indexCount, int& startLineNumberInConsole){
+int moveRight(){
     int startLineNumberRecord = startLineNumberInConsole;
     switch(mode){
         case Mode::command:{
@@ -318,7 +362,7 @@ int moveRight(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<in
         }
     }
     mouse.renewX(mouse.getX()+1);
-    Position posInConsole = fromMouseToConsole(mouse, myWin, indexCount, startLineNumberInConsole, vectorLineNumber);
+    Position posInConsole = fromMouseToConsole();
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     int gapSize = (myWin.height-1-bottomLineCount)/2>5?5:(myWin.height-1-bottomLineCount)/2;
     if(posInConsole.getY()>myWin.height-1-bottomLineCount-gapSize){
@@ -330,29 +374,29 @@ int moveRight(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<in
     if(startLineNumberRecord!=startLineNumberInConsole)return 1;
     return 2;
 }
-int pageUp(Mouse& mouse, vector<int>& vectorLineNumber,MyWindow& myWin, string bottomContent, int& indexCount, int& startLineNumberInConsole){
+int pageUp(){
     if(startLineNumberInConsole == 1){
         return 0;
     }
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     startLineNumberInConsole = startLineNumberInConsole-(myWin.height-bottomLineCount)>0?startLineNumberInConsole-(myWin.height-bottomLineCount):1;
     int tempLineNumber = startLineNumberInConsole, count = 0, lineNumberInText;
-    while(!(lineNumberInText = getLineNumberInText(tempLineNumber--, vectorLineNumber)))count++;
+    while(!(lineNumberInText = getLineNumberInText(tempLineNumber--)))count++;
     mouse.renewPos(count*(myWin.wide-indexCount-1), lineNumberInText-1);
     return 1;
 }
-int pageDown(Mouse& mouse, vector<int>& vectorLineNumber, vector<int>& vectorLineCount,MyWindow& myWin, string bottomContent, int& indexCount, int& startLineNumberInConsole){
+int pageDown(){
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     if(vectorLineNumber[vectorLineNumber.size()-1]+vectorLineCount[vectorLineCount.size()-1]-startLineNumberInConsole<=myWin.height-bottomLineCount){
         return 0;
     }
     startLineNumberInConsole = startLineNumberInConsole+myWin.height-bottomLineCount<vectorLineNumber[vectorLineNumber.size()-1]+vectorLineCount[vectorLineCount.size()-1]?startLineNumberInConsole+myWin.height-bottomLineCount:vectorLineNumber[vectorLineNumber.size()-1]+vectorLineCount[vectorLineCount.size()-1]-(myWin.height-bottomLineCount);
     int tempLineNumber = startLineNumberInConsole, count = 0, lineNumberInText;
-    while(!(lineNumberInText = getLineNumberInText(tempLineNumber--, vectorLineNumber)))count++;
+    while(!(lineNumberInText = getLineNumberInText(tempLineNumber--)))count++;
     mouse.renewPos(count*(myWin.wide-indexCount-1), lineNumberInText-1);
     return 1;
 }
-int home(Mouse& mouse, int& startLineNumberInConsole){
+int home(){
     if(startLineNumberInConsole == 1){
         return 0;
     }
@@ -362,18 +406,18 @@ int home(Mouse& mouse, int& startLineNumberInConsole){
         return 1;
     }
 }
-int end(Mouse& mouse, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, MyWindow& myWin, string bottomContent, int& indexCount, int& startLineNumberInConsole){
+int end(){
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     if(vectorLineNumber[vectorLineNumber.size()-1]+vectorLineCount[vectorLineCount.size()-1]-startLineNumberInConsole<=myWin.height-bottomLineCount){
         return 0;
     }
     startLineNumberInConsole = vectorLineNumber[vectorLineNumber.size()-1]+vectorLineCount[vectorLineCount.size()-1]-(myWin.height-bottomLineCount);
     int tempLineNumber = startLineNumberInConsole, count = 0, lineNumberInText;
-    while(!(lineNumberInText = getLineNumberInText(tempLineNumber--, vectorLineNumber)))count++;
+    while(!(lineNumberInText = getLineNumberInText(tempLineNumber--)))count++;
     mouse.renewPos(count*(myWin.wide-indexCount-1), lineNumberInText-1);
     return 1;
 }
-int moveToLHeadOfLine(Mouse& mouse, vector<int>& vectorLineNumber, Mode& mode, int& startLineNumberInConsole){
+int moveToLHeadOfLine(){
     if(mouse.getX()==0){
         return 0;
     }
@@ -383,21 +427,21 @@ int moveToLHeadOfLine(Mouse& mouse, vector<int>& vectorLineNumber, Mode& mode, i
     }
     return 1;
 }
-int moveToEndOfLine(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& myWin, Mode& mode, string bottomContent, int& startLineNumberInConsole){
+int moveToEndOfLine(){
     if(mouse.getX()==(*text.v)[mouse.getY()].size()-1){
         return 0;
     }
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     mouse.renewX((*text.v)[mouse.getY()].size() - 1);
     int tempLineNumber = startLineNumberInConsole, count = 0, lineNumberInText;
-    while(!(lineNumberInText = getLineNumberInText(tempLineNumber--, vectorLineNumber)))count++;
+    while(!(lineNumberInText = getLineNumberInText(tempLineNumber--)))count++;
     if(vectorLineNumber[lineNumberInText-1]+count>startLineNumberInConsole+myWin.height-bottomLineCount){
         startLineNumberInConsole = vectorLineNumber[lineNumberInText-1]+count - myWin.height + bottomLineCount;
     }
     return 1;
 }
 
-int deleteCharHere(Text& text, Mouse& mouse, MyWindow& myWin, Mode& mode, int& indexCount, int& startLineNumberInConsole){
+int deleteCharHere(){
     //在空空白行或者在结尾
     if((*text.v)[mouse.getY()].size()==0||mouse.getX()==(*text.v)[mouse.getY()].size()){
         return 0;
@@ -413,7 +457,7 @@ int deleteCharHere(Text& text, Mouse& mouse, MyWindow& myWin, Mode& mode, int& i
     (*text.v)[mouse.getY()].resize((*text.v)[mouse.getY()].size()-1);
     return 1;
 }
-int deleteCharBefore(Text& text, Mouse& mouse, MyWindow& myWin, int& indexCount, int& startLineNumberInConsole){
+int deleteCharBefore(){
     //光标在开头
     if(mouse.getX()==0){
         if(mouse.getY()==0){
@@ -441,7 +485,7 @@ int deleteCharBefore(Text& text, Mouse& mouse, MyWindow& myWin, int& indexCount,
     mouse.renewX(mouse.getX()-1);
     return 1;
 }
-int pasteAfter(Text& text, Mouse& mouse, string pasteContent){
+int pasteAfter(){
     if(pasteContent==""){
         return 0;
     }
@@ -458,7 +502,7 @@ int pasteAfter(Text& text, Mouse& mouse, string pasteContent){
     }
     return 1;
 }
-int pasteBefore(Text& text, Mouse& mouse, string pasteContent, MyWindow& myWin, int& indexCount, int& startLineNumberInConsole){
+int pasteBefore(){
     if(pasteContent==""){
         return 0;
     }
@@ -484,7 +528,7 @@ int pasteBefore(Text& text, Mouse& mouse, string pasteContent, MyWindow& myWin, 
     startLineNumberInConsole=startLineNumberInConsole+(pasteContent.size()+myWin.wide-indexCount-2)/(myWin.wide-indexCount-1)-1;
     return 1;
 }
-int charReplace(Text& text, Mouse& mouse, char ch){
+int charReplace(char ch){
     if((*text.v)[mouse.getY()].size()==0){
         return 0;
     }
@@ -493,14 +537,14 @@ int charReplace(Text& text, Mouse& mouse, char ch){
         return 1;
     }
 }
-int deleteLineHere(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& myWin, string bottomContent, int& indexCount, int& startLineNumberInConsole){
+int deleteLineHere(){
     if(!(*text.v)[mouse.getY()].size()){
         return 0;
     }
     (*text.v)[mouse.getY()].resize(0);
     mouse.renewX(0);
     int startLineNumberRecord = startLineNumberInConsole;
-    Position posInConsole = fromMouseToConsole(mouse, myWin, indexCount, startLineNumberInConsole, vectorLineNumber);
+    Position posInConsole = fromMouseToConsole();
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     int gapSize = (myWin.height-1-bottomLineCount)/2>5?5:(myWin.height-1-bottomLineCount)/2;
     if(mouse.getX()>(*text.v)[mouse.getY()].size() - 1||(*text.v)[mouse.getY()].size() == 0)mouse.renewX((*text.v)[mouse.getY()].size() == 0?0:(*text.v)[mouse.getY()].size() - 1);
@@ -510,7 +554,7 @@ int deleteLineHere(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWi
     if(startLineNumberRecord!=startLineNumberInConsole)return 1;
     return 2;
 }
-int deleteLineAfter(Text& text, Mouse& mouse, MyWindow& myWin, int& indexCount, int& startLineNumberInConsole){
+int deleteLineAfter(){
     if(!(*text.v)[mouse.getY()].size()){
         return 0;
     }
@@ -519,7 +563,7 @@ int deleteLineAfter(Text& text, Mouse& mouse, MyWindow& myWin, int& indexCount, 
     mouse.renewX(mouse.getX()>0?mouse.getX()-1:0);
     return 1;
 }
-int deleteLineBefore(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& myWin, string bottomContent, int& indexCount, int& startLineNumberInConsole){
+int deleteLineBefore(){
     if(!(*text.v)[mouse.getY()].size()){
         return 0;
     }
@@ -529,7 +573,7 @@ int deleteLineBefore(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, My
     (*text.v)[mouse.getY()].resize((*text.v)[mouse.getY()].size()-mouse.getX()-1);
     mouse.renewX(0);
     int startLineNumberRecord = startLineNumberInConsole;
-    Position posInConsole = fromMouseToConsole(mouse, myWin, indexCount, startLineNumberInConsole, vectorLineNumber);
+    Position posInConsole = fromMouseToConsole();
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     int gapSize = (myWin.height-1-bottomLineCount)/2>5?5:(myWin.height-1-bottomLineCount)/2;
     if(mouse.getX()>(*text.v)[mouse.getY()].size() - 1||(*text.v)[mouse.getY()].size() == 0)mouse.renewX((*text.v)[mouse.getY()].size() == 0?0:(*text.v)[mouse.getY()].size() - 1);
@@ -539,7 +583,7 @@ int deleteLineBefore(Text& text, Mouse& mouse, vector<int>& vectorLineNumber, My
     if(startLineNumberRecord!=startLineNumberInConsole)return 1;
     return 2;
 }
-int insertChar(Text& text, Mouse& mouse, char ch, MyWindow& myWin, int& indexCount, int& startLineNumberInConsole){
+int insertChar(char ch){
     if(ch==9){
         if((*text.v)[mouse.getY()].size()==0){
             for(int i=0;i<4;i++)(*text.v)[mouse.getY()].push_back(' ');
@@ -571,7 +615,7 @@ int insertChar(Text& text, Mouse& mouse, char ch, MyWindow& myWin, int& indexCou
         return 1;
     }
 }
-void enterKey(Text& text, Mouse& mouse, int& startLineNumberInConsole, int& indexCount){
+void enterKey(){
     vector<char> temp;
     for(int i=mouse.getX();i<(*text.v)[mouse.getY()].size();i++){
         temp.push_back((*text.v)[mouse.getY()][i]);
@@ -587,7 +631,7 @@ void enterKey(Text& text, Mouse& mouse, int& startLineNumberInConsole, int& inde
     startLineNumberInConsole+=1;
 }
 
-int undoOneStep(Text& text, Mouse& mouse, OperationStack& opstk){
+int undoOneStep(){
     if(opstk.empty()){
         return 0;
     }
@@ -618,7 +662,7 @@ int undoOneStep(Text& text, Mouse& mouse, OperationStack& opstk){
     }
     return 1;
 }
-int undoAllStep(Text& text, Mouse& mouse, OperationStack& opstk){
+int undoAllStep(){
     if(opstk.empty()){
         return 0;
     }
@@ -653,8 +697,8 @@ int undoAllStep(Text& text, Mouse& mouse, OperationStack& opstk){
     return 1;
 }
 
-int searchDestination(Text& text, string destination, vector<Position>& searchResult){
-    searchResult.resize(0);
+int searchDestination(){
+    (*searchResult).resize(0);
     int xLast, xNew;
     for(int i=0;i<(*text.v).size();i++){
         xLast=-1;
@@ -662,20 +706,20 @@ int searchDestination(Text& text, string destination, vector<Position>& searchRe
         if(!temp.size())continue;
         while(temp.size()>=destination.size() && (xNew=KMPSearch(temp, destination))!=temp.size()){
             ++xLast += xNew;
-            searchResult.push_back({xLast, i});
+            (*searchResult).push_back({xLast, i});
             temp.resize(0);
             for(int j=xLast+1;j<(*text.v)[i].size();j++){
                 temp.push_back((*text.v)[i][j]);
             }
         }
     }
-    if(searchResult.size())return 1;
+    if((*searchResult).size())return 1;
     return 0;
 }
-int searchNext(vector<Position>& result, Text& text, Mouse& mouse, vector<int>& vectorLineNumber, vector<int>& vectorLineCount, MyWindow& myWin, string bottomContent, int& indexCount, int& startLineNumberInConsole){
+int searchNext(){
     Position tempPos;
     int flag=0;
-    for(auto i:result){
+    for(auto i:*searchResult){
         if(i.getY()==mouse.getY()&&i.getX()>mouse.getX()||i.getY()>mouse.getY()){
             tempPos=i;
             flag=1;
@@ -686,7 +730,7 @@ int searchNext(vector<Position>& result, Text& text, Mouse& mouse, vector<int>& 
     mouse.renewPos(tempPos.getX(), tempPos.getY());
 
     int startLineNumberRecord = startLineNumberInConsole;
-    Position posInConsole = fromMouseToConsole(mouse, myWin, indexCount, startLineNumberInConsole, vectorLineNumber);
+    Position posInConsole = fromMouseToConsole();
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     int gapSize = (myWin.height-1-bottomLineCount)/2>5?5:(myWin.height-1-bottomLineCount)/2;
     if(mouse.getX()>(*text.v)[mouse.getY()].size() - 1||(*text.v)[mouse.getY()].size() == 0)mouse.renewX((*text.v)[mouse.getY()].size() == 0?0:(*text.v)[mouse.getY()].size() - 1);
@@ -700,12 +744,12 @@ int searchNext(vector<Position>& result, Text& text, Mouse& mouse, vector<int>& 
     return 2;
     
 }
-int searchLast(vector<Position>& result, Text& text, Mouse& mouse, vector<int>& vectorLineNumber, MyWindow& myWin, string bottomContent, int indexCount, int& startLineNumberInConsole){
+int searchLast(){
     Position tempPos;
     int flag=0;
-    for(int i=result.size()-1;i>=0;i--){
-        if(result[i].getY()==mouse.getY()&&result[i].getX()<mouse.getX()||result[i].getY()<mouse.getY()){
-            tempPos=result[i];
+    for(int i=(*searchResult).size()-1;i>=0;i--){
+        if((*searchResult)[i].getY()==mouse.getY()&&(*searchResult)[i].getX()<mouse.getX()||(*searchResult)[i].getY()<mouse.getY()){
+            tempPos=(*searchResult)[i];
             flag=1;
             break;
         }
@@ -715,7 +759,7 @@ int searchLast(vector<Position>& result, Text& text, Mouse& mouse, vector<int>& 
     }
     mouse.renewPos(tempPos.getX(),tempPos.getY());
     int startLineNumberRecord = startLineNumberInConsole;
-    Position posInConsole = fromMouseToConsole(mouse, myWin, indexCount, startLineNumberInConsole, vectorLineNumber);
+    Position posInConsole = fromMouseToConsole();
     int bottomLineCount = bottomContent.size()>0?(bottomContent.size() + getIndexOfNumber(mouse.getX()+1) + getIndexOfNumber(mouse.getY()+1) + myWin.wide)/myWin.wide:1;
     int gapSize = (myWin.height-1-bottomLineCount)/2>5?5:(myWin.height-1-bottomLineCount)/2;
     if(mouse.getX()>(*text.v)[mouse.getY()].size() - 1||(*text.v)[mouse.getY()].size() == 0)mouse.renewX((*text.v)[mouse.getY()].size() == 0?0:(*text.v)[mouse.getY()].size() - 1);
@@ -771,7 +815,7 @@ int KMPSearch(vector<char> src, string dest) {
 	return len1;//src中不存在dest，返回src的长度作为起始地址代表没有找到
 }
 
-void changeMode(char select, Text& text, Mouse& mouse){
+void changeMode(char select){
     switch(select){
         case 'i':
             mouse.renewX((*text.v)[mouse.getY()].size()>0?mouse.getX()+1:0);
@@ -786,11 +830,11 @@ void changeMode(char select, Text& text, Mouse& mouse){
             break;
     }
 }
-void save(Text& text, const string file){
+void save(){
     std::ofstream ofs;
     ofs.open(file, std::ios::out);
     if(!ofs.is_open()){
-        system("cls");
+        clear();
         cout<<"fail to save file"<<endl;
         exit(-1);
     }
@@ -803,7 +847,7 @@ void save(Text& text, const string file){
     ofs.close();
 }
 
-int duplicateLineHere(Text& text, Mouse& mouse, string& pasteContent){
+int duplicateLineHere(){
     if(!(*text.v)[mouse.getY()].size()){
         return 0;
     }
@@ -813,7 +857,7 @@ int duplicateLineHere(Text& text, Mouse& mouse, string& pasteContent){
     }
     return 1;
 }
-int duplicateLineAfter(Text& text, Mouse& mouse, string& pasteContent){
+int duplicateLineAfter(){
     if(!(*text.v)[mouse.getY()].size()){
         return 0;
     }
@@ -823,7 +867,7 @@ int duplicateLineAfter(Text& text, Mouse& mouse, string& pasteContent){
     }
     return 1;
 }
-int duplicateLineBefore(Text& text, Mouse& mouse, string& pasteContent){
+int duplicateLineBefore(){
     if(!(*text.v)[mouse.getY()].size()){
         return 0;
     }
@@ -834,61 +878,23 @@ int duplicateLineBefore(Text& text, Mouse& mouse, string& pasteContent){
     return 1;
 }
 
-int editFile(Text& text, const string file){
+int editFile(){
     //关回显
-    HANDLE stdIn = GetStdHandle(STD_INPUT_HANDLE);
-	DWORD consoleMode;
-	GetConsoleMode(stdIn, &consoleMode);
-	SetConsoleMode(stdIn, consoleMode & ~ENABLE_ECHO_INPUT);
-    //不变量
-    
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);//窗口输出句柄
-    //
-    int startLineNumberInConsole = 1;//开始输出的行数
-    //
-    Mouse mouse;//鼠标在文本中的位置
-    //
-    OperationStack opstk;//操作栈
-    //
-    Mode mode=Mode::command;//模式
-    //
-    vector<int> vectorLineNumber , vectorLineCount;//记录文本在控制台窗口下行号和行数信息
-    //
-    string bottomContent = "";//底部显示的信息
-    //子线程自动更新
-    MyWindow myWin = getMyWindow(hConsole);//记录窗口大小信息
-    //
-    int indexCount = getIndexCount(text);//记录文本最大行数的位数
-    //
-    string commandInput;//记录命令
-    //子线程自动更新
-    queue<int> queueInput;//记录输入
-    //
-    vector<Position>* searchResult = new vector<Position>;//记录查找结果
-    //
-    // bool LastCharIsspecial = 0;//记录是遇到0或者224但是queueInput为空，即特殊键输入还没有完全入队
-    //
-    bool runStatus = true, getInputsStatus = true, handleWinVarStatus = true;
-    //
-    int returnFlag;
-    //
-    int tempInput;//输入
-    //
-    int contentChangeFlag=0;
-    //
-    string pasteContent = "";//复制的内容
-    //
-    string destination = "";
-    //
-    int tempLineNumber;
+    echoOff();
 
-    initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, 0);
-    system("cls");
-    showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-    thread capInput(captureInput, std::ref(getInputsStatus), std::ref(queueInput));
-    thread handleWinVar(processWindowChange, std::ref(handleWinVarStatus), std::ref(hConsole), std::ref(text), std::ref(myWin), std::ref(vectorLineNumber), std::ref(vectorLineCount), std::ref(mouse), std::ref(mode), std::ref(bottomContent), std::ref(startLineNumberInConsole), std::ref(indexCount));
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    startLineNumberInConsole = 1;
+    mode=Mode::command;
+    myWin = getMyWindow();
+    indexCount = getIndexCount();
+    searchResult = new vector<Position>;
+    initLineInfo(0);
+    clear();
+    showUI();
+    showBottomInfo();
+    showCursor();
+    thread capInput(captureInput);
+    thread handleWinVar(processWindowChange);
     while(runStatus){
         switch (mode){
             case Mode::command:
@@ -897,797 +903,33 @@ int editFile(Text& text, const string file){
                     // std::lock_guard<std::mutex> lock(mtx);
                     mtx.lock();
                     if(!queueInput.empty()){
-                        tempInput = queueInput.front();
+                        input = queueInput.front();
                         queueInput.pop();
                         mtx.unlock();
-                        //if(LastCharIsspecial)goto specialChar01;//上一个是0或者224
                         //特殊按键
-                        if(tempInput == 0 || tempInput == 224){
+                        if(input == 0 || input == 224){
                             mtx.lock();
-                            tempInput = queueInput.front();
+                            input = queueInput.front();
                             queueInput.pop();
                             mtx.unlock();
-                            // if(!queueInput.empty()){
-                            //     tempInput = queueInput.front();
-                            //     queueInput.pop();
-                            // }
-                            // else {
-                            //     LastCharIsspecial = 1;
-                            //     break;
-                            // }
-                            // specialChar01:
-                            // if(LastCharIsspecial)LastCharIsspecial=0;
-                            switch(tempInput){
-                                case 73://pgup
-                                    if(pageUp(mouse, vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                        bottomContent = "pgup";
-                                        system("cls");
-                                        showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                    }
-                                    else{
-                                        cout<<'\7';
-                                        bottomContent = "arrived top!";
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 81://padown
-                                    if(pageDown(mouse, vectorLineNumber, vectorLineCount, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                        bottomContent = "pgdown";
-                                        system("cls");
-                                        showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                    }
-                                    else{
-                                        cout<<'\7';
-                                        bottomContent = "arrived bottom!";
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 71://home
-                                    if(home(mouse, startLineNumberInConsole)){
-                                        bottomContent = "home";
-                                        system("cls");
-                                        showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                    }
-                                    else{
-                                        cout<<'\7';
-                                        bottomContent = "arrived top!";
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 79://end
-                                    if(end(mouse, vectorLineNumber, vectorLineCount, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                        bottomContent = "end";
-                                        system("cls");
-                                        showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                    }
-                                    else{
-                                        cout<<'\7';
-                                        bottomContent = "arrived bottom!";
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 72://上
-                                    if(returnFlag = moveUp(text, mouse, vectorLineNumber, myWin, mode, bottomContent, indexCount, startLineNumberInConsole)){
-                                        bottomContent = "move up";
-                                        if(returnFlag==1){
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                        else{
-                                            bottomContent="";
-                                        }
-                                    }
-                                    else {
-                                        cout<<'\7';
-                                        bottomContent = "arrived top!";
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 80://下
-                                    if(returnFlag = moveDown(text, mouse, vectorLineNumber, vectorLineCount, myWin, mode,  bottomContent, indexCount, startLineNumberInConsole)){
-                                        bottomContent = "move down";
-                                        if(returnFlag==1){
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                        else{
-                                            bottomContent="";
-                                        }
-                                    }
-                                    else {
-                                        cout<<'\7';
-                                        bottomContent = "arrived bottom!";
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 75://左
-                                    if(returnFlag = moveLeft(text, mouse, vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                        bottomContent = "move left";
-                                        if(returnFlag==1){
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                        else{
-                                            bottomContent="";
-                                        }
-                                    }
-                                    else {
-                                        cout<<'\7';
-                                        bottomContent = "arrived left!";
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 77://右
-                                    if(returnFlag = moveRight(text, mouse, vectorLineNumber, vectorLineCount, myWin, mode, bottomContent, indexCount, startLineNumberInConsole)){
-                                        bottomContent = "move right";
-                                        if(returnFlag==1){
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                        else{
-                                            bottomContent="";
-                                        }
-                                    }
-                                    else {
-                                        cout<<'\7';
-                                        bottomContent = "arrived right!";
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                default:
-                                    cout<<'\7';
-                                    bottomContent="illegal char!";
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;//其他特殊按键不理会
-                            }
+                            commandSpecialChar();
                         }
                         //普通可显示字符
-                        else if(tempInput >= 32 && tempInput <= 126){
-                            if(commandInput.size() == 0){
-                                switch(tempInput){
-                                    case ':':
-                                        commandInput+=tempInput;
-                                        bottomContent = commandInput;
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'h':
-                                        if(returnFlag = moveLeft(text, mouse, vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                            bottomContent = "moved left";
-                                            if(returnFlag==1){
-                                                system("cls");
-                                                showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                            }
-                                            else{
-                                                bottomContent="";
-                                            }
-                                        }
-                                        else {
-                                            cout<<'\7';
-                                            bottomContent = "arrived left!";
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'j':
-                                        if(returnFlag = moveDown(text, mouse, vectorLineNumber, vectorLineCount, myWin, mode, bottomContent, indexCount, startLineNumberInConsole)){
-                                            bottomContent = "moved down";
-                                            if(returnFlag==1){
-                                                system("cls");
-                                                showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                            }
-                                            else{
-                                                bottomContent="";
-                                            }
-                                        }
-                                        else {
-                                            cout<<'\7';
-                                            bottomContent = "arrived bottom!";
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'k':
-                                        if(returnFlag = moveUp(text, mouse, vectorLineNumber, myWin, mode, bottomContent, indexCount, startLineNumberInConsole)){
-                                            bottomContent = "moved up";
-                                            if(returnFlag==1){
-                                                system("cls");
-                                                showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                            }
-                                            else{
-                                                bottomContent="";
-                                            }
-                                        }
-                                        else {
-                                            cout<<'\7';
-                                            bottomContent = "arrived top!";
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'l':
-                                        if(returnFlag = moveRight(text, mouse, vectorLineNumber, vectorLineCount, myWin, mode, bottomContent, indexCount, startLineNumberInConsole)){
-                                            bottomContent = "move right";
-                                            if(returnFlag==1){
-                                                system("cls");
-                                                showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                            }
-                                            else{
-                                                bottomContent="";
-                                            }
-                                        }
-                                        else {
-                                            cout<<'\7';
-                                            bottomContent = "arrived right!";
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case '^':
-                                        if(moveToLHeadOfLine(mouse, vectorLineNumber, mode, startLineNumberInConsole)){
-                                            bottomContent = "went to head";
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                        else{
-                                            cout<<'\7';
-                                            bottomContent = "arrived head of line!";
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case '$':
-                                        if(moveToEndOfLine(text, mouse, vectorLineNumber, myWin, mode, bottomContent, startLineNumberInConsole)){
-                                            bottomContent = "went to end";
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                        else {
-                                            cout<<'\7';
-                                            bottomContent = "arrived end of line!";
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'd':
-                                        commandInput+=tempInput;
-                                        bottomContent = commandInput;
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'y':
-                                        commandInput+=tempInput;
-                                        bottomContent = commandInput;
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'p':
-                                        if(pasteContent!=""){
-                                            opstk.pushBack(pasteContent, operate::dele, {mouse.getX()==0?0:mouse.getX()+1, mouse.getY()});
-                                            contentChangeFlag=1;
-                                            searchResult->resize(0);
-                                        }
-                                        if(pasteAfter(text, mouse, pasteContent)){
-                                            initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, mouse.getY());
-                                            bottomContent = "pasted after";
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                        else{
-                                            cout<<'\7';
-                                            bottomContent = "no content to paste!";
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'P':
-                                        if(pasteContent!=""){
-                                            opstk.pushBack(pasteContent, operate::dele, {mouse.getX(), mouse.getY()});
-                                            contentChangeFlag=1;
-                                            searchResult->resize(0);
-                                        }
-                                        if(pasteBefore(text, mouse, pasteContent, myWin, indexCount, startLineNumberInConsole)){
-                                            initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, 0);
-                                            bottomContent = "pasted before";
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                        else{
-                                            cout<<'\7';
-                                            bottomContent = "no content to paste!";
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'r':
-                                        commandInput+=tempInput;
-                                        bottomContent = commandInput;
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'x':
-                                        if((*text.v)[mouse.getY()].size()){
-                                            opstk.pushBack(string(1, (*text.v)[mouse.getY()][mouse.getX()]), operate::add, {mouse.getX(), mouse.getY()});
-                                            contentChangeFlag=1;
-                                            searchResult->resize(0);
-                                        }
-                                        if(deleteCharHere(text, mouse, myWin, mode, indexCount, startLineNumberInConsole)){
-                                            initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, mouse.getY());
-                                            //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
-                                            bottomContent = "";
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                        else{
-                                            cout<<'\7';
-                                            bottomContent = "no char to delete!";
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'u':
-                                        if(!opstk.empty())tempLineNumber=opstk.top().pos.getY();
-                                        if(undoOneStep(text, mouse, opstk)){
-                                            contentChangeFlag=1;
-                                            searchResult->resize(0);
-                                            initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, tempLineNumber);
-                                            //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
-                                            bottomContent = "undid one step";
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                        else{
-                                            cout<<'\7';
-                                            bottomContent = "nothing to undo!";
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'U':
-                                        if(!opstk.empty())tempLineNumber=opstk.top().pos.getY();
-                                        if(undoAllStep(text, mouse, opstk)){
-                                            contentChangeFlag=1;
-                                            searchResult->resize(0);
-                                            initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, tempLineNumber);
-                                            //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
-                                            bottomContent = "undid all step";
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                        else{
-                                            cout<<'\7';
-                                            bottomContent = "nothing to undo!";
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'n':
-                                        if(returnFlag = searchNext(*searchResult, text, mouse, vectorLineNumber, vectorLineCount, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                            if(returnFlag==1){
-                                                system("cls");
-                                                showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                            }
-                                            else{
-                                                bottomContent='/'+destination;
-                                            }
-                                        }
-                                        else{
-                                            cout<<'\7';
-                                            bottomContent="no next one!";
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'N':
-                                        if(returnFlag= searchLast(*searchResult, text, mouse, vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                            if(returnFlag==1){
-                                                system("cls");
-                                                showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                            }
-                                            else{
-                                                bottomContent='/'+destination;
-                                            }
-                                        }
-                                        else{
-                                            cout<<'\7';
-                                            bottomContent = "no last one!";
-                                        }
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'i':
-                                        mode=Mode::insert;
-                                        changeMode('i', text, mouse);
-                                        bottomContent="--insert";
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'I':
-                                        mode=Mode::insert;
-                                        changeMode('I', text, mouse);
-                                        bottomContent="--insert";
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'a':
-                                        mode=Mode::insert;
-                                        changeMode('a', text, mouse);
-                                        bottomContent="--insert";
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case 'A':
-                                        mode=Mode::insert;
-                                        changeMode('A', text, mouse);
-                                        bottomContent="--insert";
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    case '/':
-                                        commandInput += tempInput;
-                                        bottomContent = commandInput;
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                    default://其他字符不理会
-                                        cout<<'\7';
-                                        bottomContent ="illegal char!";
-                                        showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                        showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                        break;
-                                }
-                            }
-                            else if(commandInput.size() == 1){
-                                //r+<char>替换
-                                if(commandInput[0] == 'r'){
-                                    commandInput="";
-                                    if((*text.v)[mouse.getY()].size()){
-                                        opstk.pushBack(string(1, (*text.v)[mouse.getY()][mouse.getX()]), operate::repl, {mouse.getX(), mouse.getY()});
-                                        contentChangeFlag=1;
-                                        searchResult->resize(0);
-                                    }
-                                    if(charReplace(text, mouse, tempInput)){
-                                        system("cls");
-                                        bottomContent="";
-                                        showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                    }
-                                    else{
-                                        cout<<'\7';
-                                        bottomContent="no char to replace!";
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);  
-                                }
-                                else if(commandInput[0] == '/'){
-                                    commandInput+=tempInput;
-                                    bottomContent=commandInput;
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);  
-                                }
-                                else {
-                                    switch(tempInput){
-                                        case 'q':
-                                        case 'w':
-                                            if(commandInput==":"){
-                                                commandInput+=tempInput;
-                                                bottomContent=commandInput;
-                                            }
-                                            else{
-                                                cout<<'\7';
-                                                commandInput="";
-                                                bottomContent="no such command!";
-                                            }
-                                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);  
-                                            break;
-                                        case 'd':
-                                            if(commandInput=="d"){
-                                                if((*text.v)[mouse.getY()].size()){
-                                                    string temp;
-                                                    for(auto i:(*text.v)[mouse.getY()]){
-                                                        temp.push_back(i);
-                                                    }
-                                                    opstk.pushBack(temp, operate::add, {0, mouse.getY()});
-                                                    contentChangeFlag=1;
-                                                    searchResult->resize(0);
-                                                }
-                                                if(deleteLineHere(text, mouse, vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                                    initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, mouse.getY());
-                                                    bottomContent = "deleted this line";
-                                                    system("cls");
-                                                    showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                                }
-                                                else{
-                                                    cout<<'\7';
-                                                    bottomContent = "no char to delete!";
-                                                }
-                                            }
-                                            else{
-                                                cout<<'\7';
-                                                bottomContent ="no such command!";
-                                            }
-                                            commandInput = "";
-                                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount); 
-                                            break;
-                                        case 'y':
-                                            if(commandInput=="y"){
-                                                if(duplicateLineHere(text, mouse, pasteContent)){
-                                                    bottomContent="duplicated this line";
-                                                }
-                                                else{
-                                                    cout<<'\7';
-                                                    bottomContent="no char to dupicate!";
-                                                }
-                                            }
-                                            else{
-                                                cout<<'\7';
-                                                bottomContent="no such command!";
-                                            }
-                                            commandInput="";
-                                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount); 
-                                            break;
-                                        case '$':
-                                            if(commandInput=="d"){
-                                                if((*text.v)[mouse.getY()].size()){
-                                                    string temp;
-                                                    for(int i=mouse.getX();i<(*text.v)[mouse.getY()].size();i++)temp.push_back((*text.v)[mouse.getY()][i]);
-                                                    opstk.pushBack(temp, operate::add, {mouse.getX(), mouse.getY()});
-                                                    contentChangeFlag=1;
-                                                    searchResult->resize(0);
-                                                }
-                                                if(deleteLineAfter(text, mouse, myWin, indexCount, startLineNumberInConsole)){
-                                                    initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, mouse.getY());
-                                                    bottomContent = "deleted this line after";
-                                                    system("cls");
-                                                    showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                                }
-                                                else{
-                                                    cout<<'\7';
-                                                    bottomContent="no char to delete!";
-                                                }
-                                            }
-                                            else if(commandInput=="y"){
-                                                if(duplicateLineAfter(text, mouse, pasteContent)){
-                                                    bottomContent="duplicated this line aster";
-                                                }
-                                                else{
-                                                    cout<<'\7';
-                                                    bottomContent="no char to dupicate!";
-                                                }
-                                            }
-                                            else{
-                                                cout<<'\7';
-                                                bottomContent = "no such command!";
-                                            }
-                                            commandInput = "";
-                                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount); 
-                                            break;
-                                        case '^':
-                                            if(commandInput=="d"){
-                                                if((*text.v)[mouse.getY()].size()){
-                                                    string temp;
-                                                    for(int i=0;i<=mouse.getX();i++){
-                                                        temp.push_back((*text.v)[mouse.getY()][i]);
-                                                    }
-                                                    opstk.pushBack(temp, operate::add, {0, mouse.getY()});
-                                                    contentChangeFlag=1;
-                                                    searchResult->resize(0);
-                                                }
-                                                if(deleteLineBefore(text, mouse, vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                                    initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, mouse.getY());
-                                                    bottomContent = "deleted this line after";
-                                                    system("cls");
-                                                    showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                                }
-                                                else{
-                                                    cout<<'\7';
-                                                    bottomContent = "no char to delete!";
-                                                }
-                                            }
-                                            else if(commandInput=="y"){
-                                                if(duplicateLineBefore(text, mouse, pasteContent)){
-                                                    bottomContent="duplicated this line before";
-                                                }
-                                                else{
-                                                    cout<<'\7';
-                                                    bottomContent="no char to duplicate!";
-                                                }
-                                            }
-                                            else{
-                                                cout<<'\7';
-                                                bottomContent = "no such command!";
-                                            }
-                                            commandInput = "";
-                                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                            break;
-                                        default://不符合命令，清空命令
-                                            commandInput = "";
-                                            cout<<'\7';
-                                            bottomContent = "no such command!";
-                                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                            break;
-                                    }
-                                }
-                            }
-                            else if(commandInput.size() == 2){
-                                if(commandInput[0] == '/'){
-                                    commandInput+=tempInput;
-                                    bottomContent=commandInput;
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                }
-                                else {
-                                    switch(tempInput){
-                                        case 'q':
-                                            if(commandInput==":w"){
-                                                commandInput+=tempInput;
-                                                bottomContent=commandInput;
-                                            }
-                                            else{
-                                                commandInput="";
-                                                cout<<'\7';
-                                                bottomContent="no such command!";
-                                            }
-                                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                            break;
-                                        case 'w':
-                                            if(commandInput==":q"){
-                                                commandInput+=tempInput;
-                                                bottomContent=commandInput;
-                                            }
-                                            else{
-                                                commandInput="";
-                                                cout<<'\7';
-                                                bottomContent="no such command!";
-                                            }
-                                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                            break;
-                                        case '!':
-                                            if(commandInput==":q"){
-                                                commandInput+=tempInput;
-                                                bottomContent=commandInput;
-                                            }
-                                            else{
-                                                commandInput="";
-                                                cout<<'\7';
-                                                bottomContent="no such command!";
-                                            }
-                                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                            break;
-                                        default://不符合命令，清空命令
-                                            commandInput = "";
-                                            cout<<'\7';
-                                            bottomContent="no such command!";
-                                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                            break;
-                                    }
-                                }
-                            }
-                            else if(commandInput.size() >= 3){
-                                if(commandInput[0] == '/'){
-                                    commandInput+=tempInput;
-                                    bottomContent=commandInput;
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                }
-                                else{
-                                    commandInput = "";
-                                    cout<<'\7';
-                                    bottomContent="no such command!";
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                }
-                                break;
-                            }
+                        else if(input >= 32 && input <= 126){
+                            commandVisibleChar();
                         }
                         //esc
-                        else if(tempInput == 27){
+                        else if(input == 27){
                             //清空命令
-                            commandInput = "";
-                            bottomContent="";
-                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                            break;
+                            commandCharESC();
                         }
                         //'\n'
-                        else if(tempInput==13){
-                            if(commandInput.size()==0){
-                                commandInput="";
-                                cout<<'\7';
-                                bottomContent="illegal char!";
-                                showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                break;
-                            }
-                            else if(commandInput.size()>1&&commandInput[0]=='/'){
-                                destination="";
-                                for(int i=1;i<commandInput.size();i++)destination.push_back(commandInput[i]);
-                                commandInput="";
-                                if(searchDestination(text, destination, *searchResult)){
-                                    string item = searchResult->size()>1?" items":" item";
-                                    bottomContent="search finished, found " + std::to_string(searchResult->size()) + item;
-                                }
-                                else{
-                                    cout<<'\7';
-                                    bottomContent="can not find!";
-                                }
-                                showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                            }
-                            else if(commandInput==":q"){
-                                commandInput="";
-                                if(contentChangeFlag){
-                                    cout<<'\7';
-                                    bottomContent="change did not saved!";
-                                }
-                                else{
-                                    runStatus=0;
-                                    break;
-                                }
-                                showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                            }
-                            else if(commandInput==":w"){
-                                commandInput="";
-                                if(contentChangeFlag){
-                                    save(text, file);
-                                    opstk.clear();
-                                    bottomContent="file saved";
-                                    contentChangeFlag=0;
-                                }
-                                else{
-                                    cout<<'\7';
-                                    bottomContent="do not need to save!";
-                                }
-                                showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                            }
-                            else if(commandInput==":q!"){
-                                commandInput="";
-                                runStatus=0;
-                                break;
-                            }
-                            else if(commandInput==":wq"||commandInput==":qw"){
-                                commandInput="";
-                                save(text, file);
-                                runStatus=0;
-                                break;
-                            }
-                            else{
-                                commandInput="";
-                                cout<<'\7';
-                                bottomContent="no such command!";
-                                showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                            }
-                            break;
+                        else if(input==13){
+                            commandCharEndLine();
                         }
                         //其他字符
                         else{
-                            commandInput="";
-                            cout<<'\7';
-                            bottomContent="illegal char!";
-                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                            break;
+                            commandOtherChar();
                         }
                     }
                     else{
@@ -1703,177 +945,37 @@ int editFile(Text& text, const string file){
                     // std::lock_guard<std::mutex> lock(mtx);
                     mtx.lock();
                     if(!queueInput.empty()){
-                        tempInput = queueInput.front();
+                        input = queueInput.front();
                         queueInput.pop();
                         mtx.unlock();
                         //if(LastCharIsspecial)goto labelSpecialChar02;
                         //特殊按键
-                        if(tempInput == 0|| tempInput == 224){
+                        if(input == 0|| input == 224){
                             mtx.lock();
-                            tempInput = queueInput.front();
+                            input = queueInput.front();
                             queueInput.pop();
                             mtx.unlock();
-                            // if(!queueInput.empty()){
-                            //     tempInput = queueInput.front();
-                            //     queueInput.pop();
-                            // }
-                            // else {
-                            //     LastCharIsspecial=1;
-                            //     break;
-                            // }
-                            // labelSpecialChar02:
-                            // if(LastCharIsspecial)LastCharIsspecial=0;
-                            switch(tempInput){
-                                case 73://pgup
-                                    if(pageUp(mouse, vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                        system("cls");
-                                        showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 81://padown
-                                    if(pageDown(mouse, vectorLineNumber, vectorLineCount, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                        system("cls");
-                                        showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 71://home
-                                    if(home(mouse, startLineNumberInConsole)){
-                                        system("cls");
-                                        showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 79://end
-                                    if(end(mouse, vectorLineNumber, vectorLineCount, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                        system("cls");
-                                        showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 83://delete
-                                    if((*text.v)[mouse.getY()].size() && mouse.getX() != (*text.v)[mouse.getY()].size()){
-                                        opstk.pushBack(string(1, (*text.v)[mouse.getY()][mouse.getX()]), operate::add, {mouse.getX(), mouse.getY()});
-                                        contentChangeFlag=1;
-                                    }
-                                    if(deleteCharHere(text, mouse, myWin, mode, indexCount, startLineNumberInConsole)){
-                                        initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, mouse.getY());
-                                        system("cls");
-                                        showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 72://上
-                                    if(returnFlag = moveUp(text, mouse, vectorLineNumber, myWin, mode, bottomContent, indexCount, startLineNumberInConsole)){
-                                        if(returnFlag==1){
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 80://下
-                                    if(returnFlag = moveDown(text, mouse, vectorLineNumber, vectorLineCount, myWin, mode,  bottomContent, indexCount, startLineNumberInConsole)){
-                                        if(returnFlag==1){
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 75://左
-                                    if(returnFlag = moveLeft(text, mouse, vectorLineNumber, myWin, bottomContent, indexCount, startLineNumberInConsole)){
-                                        if(returnFlag==1){
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                case 77://右
-                                    if(returnFlag = moveRight(text, mouse, vectorLineNumber, vectorLineCount, myWin, mode, bottomContent, indexCount, startLineNumberInConsole)){
-                                        if(returnFlag==1){
-                                            system("cls");
-                                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                                        }
-                                    }
-                                    showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                                    showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
-                                    break;
-                                default://其他特殊字符警告
-                                    cout<<'\7';
-                                    break;
-                            }
+                            insertSpecialChar();
+                            
                         }
                         //普通可显示字符
-                        else if(tempInput >= 32 && tempInput <= 126 || tempInput == 9){      
-                            opstk.pushBack(tempInput==9?string(4, ' '):string(1, tempInput), operate::dele, {mouse.getX(), mouse.getY()});
-                            contentChangeFlag=1;
-                            searchResult->resize(0);
-                            if(insertChar(text, mouse, tempInput, myWin, indexCount, startLineNumberInConsole)){
-                                initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, mouse.getY());
-                                //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
-                            }
-                            system("cls");
-                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
+                        else if(input >= 32 && input <= 126 || input == 9){      
+                            insertVisibleChar();
                         }
                         //esc
-                        else if(tempInput == 27){
-                            mode=Mode::command;
-                            if(mouse.getX()==(*text.v)[mouse.getY()].size())mouse.renewX(mouse.getX()>0?mouse.getX()-1:0);
-                            bottomContent = "--command--";
-                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
+                        else if(input == 27){
+                            insertCharESC();
                         }
                         //backspace
-                        else if(tempInput == 8){
-                            if(mouse.getX() == 0 && mouse.getY() != 0){
-                                //合并行
-                                opstk.clear();
-                                contentChangeFlag=1;
-                            }
-                            else if(mouse.getX()!=0){
-                                opstk.pushBack(string(1, (*text.v)[mouse.getY()][mouse.getX()-1]), operate::add, {mouse.getX()-1, mouse.getY()});
-                                contentChangeFlag=1;
-                                searchResult->resize(0);
-                            }
-                            if(deleteCharBefore(text, mouse, myWin, indexCount, startLineNumberInConsole)){
-                                initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, mouse.getY()-1);
-                                //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
-                                contentChangeFlag=1;
-                                system("cls");
-                                showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                            }
-                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
+                        else if(input == 8){
+                            insertCharBackspace();
                         }
                         //'\n'
-                        else if(tempInput == 13){
-                            enterKey(text, mouse, startLineNumberInConsole, indexCount);
-                            //重开行
-                            opstk.clear();
-                            contentChangeFlag=1;
-                            searchResult->resize(0);
-                            initLineInfo(text, vectorLineNumber, vectorLineCount, myWin, indexCount, mouse.getY()-1);
-                            //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
-                            system("cls");
-                            showUI(hConsole, text, mouse, myWin, vectorLineNumber, vectorLineCount, bottomContent, startLineNumberInConsole, indexCount);
-                            showBottomInfo(hConsole, mouse, myWin, bottomContent);
-                            showCursor(hConsole, mouse, myWin, vectorLineNumber, mode, bottomContent, startLineNumberInConsole, indexCount);
+                        else if(input == 13){
+                            insertCharEndLine();
                         }
                         //其他字符
-                        else cout<<'\7';
+                        else bell();
                     }
                     else{
                         mtx.unlock();
@@ -1888,8 +990,943 @@ int editFile(Text& text, const string file){
     //如果不等待结束子线程后释放资源，导致共享的资源释放出问题
     capInput.join();
     handleWinVar.join();
-    resetCursor(hConsole);
-    system("cls");
+    resetCursor();
+    clear();
     delete searchResult;
     return 1;
+}
+
+void bell(){
+    cout<<'\7';
+}
+
+void clear(){
+    system("cls");
+}
+
+void echoOff(){
+    HANDLE stdIn = GetStdHandle(STD_INPUT_HANDLE);
+	DWORD consoleMode;
+	GetConsoleMode(stdIn, &consoleMode);
+	SetConsoleMode(stdIn, consoleMode & ~ENABLE_ECHO_INPUT);
+}
+
+void commandSpecialChar(){
+
+    switch(input){
+        case 73://pgup
+            if(pageUp()){
+                bottomContent = "pgup";
+                clear();
+                showUI();
+            }
+            else{
+                bell();
+                bottomContent = "arrived top!";
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 81://padown
+            if(pageDown()){
+                bottomContent = "pgdown";
+                clear();
+                showUI();
+            }
+            else{
+                bell();
+                bottomContent = "arrived bottom!";
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 71://home
+            if(home()){
+                bottomContent = "home";
+                clear();
+                showUI();
+            }
+            else{
+                bell();
+                bottomContent = "arrived top!";
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 79://end
+            if(end()){
+                bottomContent = "end";
+                clear();
+                showUI();
+            }
+            else{
+                bell();
+                bottomContent = "arrived bottom!";
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 72://上
+            if(returnFlag = moveUp()){
+                bottomContent = "move up";
+                if(returnFlag==1){
+                    clear();
+                    showUI();
+                }
+                else{
+                    bottomContent="";
+                }
+            }
+            else {
+                bell();
+                bottomContent = "arrived top!";
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 80://下
+            if(returnFlag = moveDown()){
+                bottomContent = "move down";
+                if(returnFlag==1){
+                    clear();
+                    showUI();
+                }
+                else{
+                    bottomContent="";
+                }
+            }
+            else {
+                bell();
+                bottomContent = "arrived bottom!";
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 75://左
+            if(returnFlag = moveLeft()){
+                bottomContent = "move left";
+                if(returnFlag==1){
+                    clear();
+                    showUI();
+                }
+                else{
+                    bottomContent="";
+                }
+            }
+            else {
+                bell();
+                bottomContent = "arrived left!";
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 77://右
+            if(returnFlag = moveRight()){
+                bottomContent = "move right";
+                if(returnFlag==1){
+                    clear();
+                    showUI();
+                }
+                else{
+                    bottomContent="";
+                }
+            }
+            else {
+                bell();
+                bottomContent = "arrived right!";
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        default:
+            bell();
+            bottomContent="illegal char!";
+            showBottomInfo();
+            showCursor();
+            break;//其他特殊按键不理会
+    }
+}
+
+void commandVisibleChar(){
+    if(commandInput.size() == 0){
+        switch(input){
+            case ':':
+                commandInput+=input;
+                bottomContent = commandInput;
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'h':
+                if(returnFlag = moveLeft()){
+                    bottomContent = "moved left";
+                    if(returnFlag==1){
+                        clear();
+                        showUI();
+                    }
+                    else{
+                        bottomContent="";
+                    }
+                }
+                else {
+                    bell();
+                    bottomContent = "arrived left!";
+                }
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'j':
+                if(returnFlag = moveDown()){
+                    bottomContent = "moved down";
+                    if(returnFlag==1){
+                        clear();
+                        showUI();
+                    }
+                    else{
+                        bottomContent="";
+                    }
+                }
+                else {
+                    bell();
+                    bottomContent = "arrived bottom!";
+                }
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'k':
+                if(returnFlag = moveUp()){
+                    bottomContent = "moved up";
+                    if(returnFlag==1){
+                        clear();
+                        showUI();
+                    }
+                    else{
+                        bottomContent="";
+                    }
+                }
+                else {
+                    bell();
+                    bottomContent = "arrived top!";
+                }
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'l':
+                if(returnFlag = moveRight()){
+                    bottomContent = "move right";
+                    if(returnFlag==1){
+                        clear();
+                        showUI();
+                    }
+                    else{
+                        bottomContent="";
+                    }
+                }
+                else {
+                    bell();
+                    bottomContent = "arrived right!";
+                }
+                showBottomInfo();
+                showCursor();
+                break;
+            case '^':
+                if(moveToLHeadOfLine()){
+                    bottomContent = "went to head";
+                    clear();
+                    showUI();
+                }
+                else{
+                    bell();
+                    bottomContent = "arrived head of line!";
+                }
+                showBottomInfo();
+                showCursor();
+                break;
+            case '$':
+                if(moveToEndOfLine()){
+                    bottomContent = "went to end";
+                    clear();
+                    showUI();
+                }
+                else {
+                    bell();
+                    bottomContent = "arrived end of line!";
+                }
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'd':
+                commandInput+=input;
+                bottomContent = commandInput;
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'y':
+                commandInput+=input;
+                bottomContent = commandInput;
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'p':
+                if(pasteContent!=""){
+                    opstk.pushBack(pasteContent, operate::dele, {mouse.getX()==0?0:mouse.getX()+1, mouse.getY()});
+                    contentChangeFlag=1;
+                    searchResult->resize(0);
+                }
+                if(pasteAfter()){
+                    initLineInfo(mouse.getY());
+                    bottomContent = "pasted after";
+                    clear();
+                    showUI();
+                }
+                else{
+                    bell();
+                    bottomContent = "no content to paste!";
+                }
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'P':
+                if(pasteContent!=""){
+                    opstk.pushBack(pasteContent, operate::dele, {mouse.getX(), mouse.getY()});
+                    contentChangeFlag=1;
+                    searchResult->resize(0);
+                }
+                if(pasteBefore()){
+                    initLineInfo(0);
+                    bottomContent = "pasted before";
+                    clear();
+                    showUI();
+                }
+                else{
+                    bell();
+                    bottomContent = "no content to paste!";
+                }
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'r':
+                commandInput+=input;
+                bottomContent = commandInput;
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'x':
+                if((*text.v)[mouse.getY()].size()){
+                    opstk.pushBack(string(1, (*text.v)[mouse.getY()][mouse.getX()]), operate::add, {mouse.getX(), mouse.getY()});
+                    contentChangeFlag=1;
+                    searchResult->resize(0);
+                }
+                if(deleteCharHere()){
+                    initLineInfo(mouse.getY());
+                    //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                    bottomContent = "";
+                    clear();
+                    showUI();
+                }
+                else{
+                    bell();
+                    bottomContent = "no char to delete!";
+                }
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'u':
+                if(!opstk.empty())lineNumber=opstk.top().pos.getY();
+                if(undoOneStep()){
+                    contentChangeFlag=1;
+                    searchResult->resize(0);
+                    initLineInfo(lineNumber);
+                    //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                    bottomContent = "undid one step";
+                    clear();
+                    showUI();
+                }
+                else{
+                    bell();
+                    bottomContent = "nothing to undo!";
+                }
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'U':
+                if(!opstk.empty())lineNumber=opstk.top().pos.getY();
+                if(undoAllStep()){
+                    contentChangeFlag=1;
+                    searchResult->resize(0);
+                    initLineInfo(lineNumber);
+                    //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+                    bottomContent = "undid all step";
+                    clear();
+                    showUI();
+                }
+                else{
+                    bell();
+                    bottomContent = "nothing to undo!";
+                }
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'n':
+                if(returnFlag = searchNext()){
+                    if(returnFlag==1){
+                        clear();
+                        showUI();
+                    }
+                    else{
+                        bottomContent='/'+destination;
+                    }
+                }
+                else{
+                    bell();
+                    bottomContent="no next one!";
+                }
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'N':
+                if(returnFlag= searchLast()){
+                    if(returnFlag==1){
+                        clear();
+                        showUI();
+                    }
+                    else{
+                        bottomContent='/'+destination;
+                    }
+                }
+                else{
+                    bell();
+                    bottomContent = "no last one!";
+                }
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'i':
+                mode=Mode::insert;
+                changeMode('i');
+                bottomContent="--insert";
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'I':
+                mode=Mode::insert;
+                changeMode('I');
+                bottomContent="--insert";
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'a':
+                mode=Mode::insert;
+                changeMode('a');
+                bottomContent="--insert";
+                showBottomInfo();
+                showCursor();
+                break;
+            case 'A':
+                mode=Mode::insert;
+                changeMode('A');
+                bottomContent="--insert";
+                showBottomInfo();
+                showCursor();
+                break;
+            case '/':
+                commandInput += input;
+                bottomContent = commandInput;
+                showBottomInfo();
+                showCursor();
+                break;
+            default://其他字符不理会
+                bell();
+                bottomContent ="illegal char!";
+                showBottomInfo();
+                showCursor();
+                break;
+        }
+    }
+    else if(commandInput.size() == 1){
+        //r+<char>替换
+        if(commandInput[0] == 'r'){
+            commandInput="";
+            if((*text.v)[mouse.getY()].size()){
+                opstk.pushBack(string(1, (*text.v)[mouse.getY()][mouse.getX()]), operate::repl, {mouse.getX(), mouse.getY()});
+                contentChangeFlag=1;
+                searchResult->resize(0);
+            }
+            if(charReplace(input)){
+                clear();
+                bottomContent="";
+                showUI();
+            }
+            else{
+                bell();
+                bottomContent="no char to replace!";
+            }
+            showBottomInfo();
+            showCursor();  
+        }
+        else if(commandInput[0] == '/'){
+            commandInput+=input;
+            bottomContent=commandInput;
+            showBottomInfo();
+            showCursor();  
+        }
+        else {
+            switch(input){
+                case 'q':
+                case 'w':
+                    if(commandInput==":"){
+                        commandInput+=input;
+                        bottomContent=commandInput;
+                    }
+                    else{
+                        bell();
+                        commandInput="";
+                        bottomContent="no such command!";
+                    }
+                    showBottomInfo();
+                    showCursor();  
+                    break;
+                case 'd':
+                    if(commandInput=="d"){
+                        if((*text.v)[mouse.getY()].size()){
+                            string temp;
+                            for(auto i:(*text.v)[mouse.getY()]){
+                                temp.push_back(i);
+                            }
+                            opstk.pushBack(temp, operate::add, {0, mouse.getY()});
+                            contentChangeFlag=1;
+                            searchResult->resize(0);
+                        }
+                        if(deleteLineHere()){
+                            initLineInfo(mouse.getY());
+                            bottomContent = "deleted this line";
+                            clear();
+                            showUI();
+                        }
+                        else{
+                            bell();
+                            bottomContent = "no char to delete!";
+                        }
+                    }
+                    else{
+                        bell();
+                        bottomContent ="no such command!";
+                    }
+                    commandInput = "";
+                    showBottomInfo();
+                    showCursor(); 
+                    break;
+                case 'y':
+                    if(commandInput=="y"){
+                        if(duplicateLineHere()){
+                            bottomContent="duplicated this line";
+                        }
+                        else{
+                            bell();
+                            bottomContent="no char to dupicate!";
+                        }
+                    }
+                    else{
+                        bell();
+                        bottomContent="no such command!";
+                    }
+                    commandInput="";
+                    showBottomInfo();
+                    showCursor(); 
+                    break;
+                case '$':
+                    if(commandInput=="d"){
+                        if((*text.v)[mouse.getY()].size()){
+                            string temp;
+                            for(int i=mouse.getX();i<(*text.v)[mouse.getY()].size();i++)temp.push_back((*text.v)[mouse.getY()][i]);
+                            opstk.pushBack(temp, operate::add, {mouse.getX(), mouse.getY()});
+                            contentChangeFlag=1;
+                            searchResult->resize(0);
+                        }
+                        if(deleteLineAfter()){
+                            initLineInfo(mouse.getY());
+                            bottomContent = "deleted this line after";
+                            clear();
+                            showUI();
+                        }
+                        else{
+                            bell();
+                            bottomContent="no char to delete!";
+                        }
+                    }
+                    else if(commandInput=="y"){
+                        if(duplicateLineAfter()){
+                            bottomContent="duplicated this line aster";
+                        }
+                        else{
+                            bell();
+                            bottomContent="no char to dupicate!";
+                        }
+                    }
+                    else{
+                        bell();
+                        bottomContent = "no such command!";
+                    }
+                    commandInput = "";
+                    showBottomInfo();
+                    showCursor(); 
+                    break;
+                case '^':
+                    if(commandInput=="d"){
+                        if((*text.v)[mouse.getY()].size()){
+                            string temp;
+                            for(int i=0;i<=mouse.getX();i++){
+                                temp.push_back((*text.v)[mouse.getY()][i]);
+                            }
+                            opstk.pushBack(temp, operate::add, {0, mouse.getY()});
+                            contentChangeFlag=1;
+                            searchResult->resize(0);
+                        }
+                        if(deleteLineBefore()){
+                            initLineInfo(mouse.getY());
+                            bottomContent = "deleted this line after";
+                            clear();
+                            showUI();
+                        }
+                        else{
+                            bell();
+                            bottomContent = "no char to delete!";
+                        }
+                    }
+                    else if(commandInput=="y"){
+                        if(duplicateLineBefore()){
+                            bottomContent="duplicated this line before";
+                        }
+                        else{
+                            bell();
+                            bottomContent="no char to duplicate!";
+                        }
+                    }
+                    else{
+                        bell();
+                        bottomContent = "no such command!";
+                    }
+                    commandInput = "";
+                    showBottomInfo();
+                    showCursor();
+                    break;
+                default://不符合命令，清空命令
+                    commandInput = "";
+                    bell();
+                    bottomContent = "no such command!";
+                    showBottomInfo();
+                    showCursor();
+                    break;
+            }
+        }
+    }
+    else if(commandInput.size() == 2){
+        if(commandInput[0] == '/'){
+            commandInput+=input;
+            bottomContent=commandInput;
+            showBottomInfo();
+            showCursor();
+        }
+        else {
+            switch(input){
+                case 'q':
+                    if(commandInput==":w"){
+                        commandInput+=input;
+                        bottomContent=commandInput;
+                    }
+                    else{
+                        commandInput="";
+                        bell();
+                        bottomContent="no such command!";
+                    }
+                    showBottomInfo();
+                    showCursor();
+                    break;
+                case 'w':
+                    if(commandInput==":q"){
+                        commandInput+=input;
+                        bottomContent=commandInput;
+                    }
+                    else{
+                        commandInput="";
+                        bell();
+                        bottomContent="no such command!";
+                    }
+                    showBottomInfo();
+                    showCursor();
+                    break;
+                case '!':
+                    if(commandInput==":q"){
+                        commandInput+=input;
+                        bottomContent=commandInput;
+                    }
+                    else{
+                        commandInput="";
+                        bell();
+                        bottomContent="no such command!";
+                    }
+                    showBottomInfo();
+                    showCursor();
+                    break;
+                default://不符合命令，清空命令
+                    commandInput = "";
+                    bell();
+                    bottomContent="no such command!";
+                    showBottomInfo();
+                    showCursor();
+                    break;
+            }
+        }
+    }
+    else if(commandInput.size() >= 3){
+        if(commandInput[0] == '/'){
+            commandInput+=input;
+            bottomContent=commandInput;
+            showBottomInfo();
+            showCursor();
+        }
+        else{
+            commandInput = "";
+            bell();
+            bottomContent="no such command!";
+            showBottomInfo();
+            showCursor();
+        }
+    }
+}
+
+void commandCharESC(){
+    commandInput = "";
+    bottomContent = "";
+    showBottomInfo();
+    showCursor();
+}
+
+void commandCharEndLine(){
+    if(commandInput.size()==0){
+        commandInput="";
+        bell();
+        bottomContent="illegal char!";
+        showBottomInfo();
+        showCursor();
+
+    }
+    else if(commandInput.size()>1&&commandInput[0]=='/'){
+        destination="";
+        for(int i=1;i<commandInput.size();i++)destination.push_back(commandInput[i]);
+        commandInput="";
+        if(searchDestination()){
+            string item = searchResult->size()>1?" items":" item";
+            bottomContent="search finished, found " + std::to_string(searchResult->size()) + item;
+        }
+        else{
+            bell();
+            bottomContent="can not find!";
+        }
+        showBottomInfo();
+        showCursor();
+    }
+    else if(commandInput==":q"){
+        commandInput="";
+        if(contentChangeFlag){
+            bell();
+            bottomContent="change did not saved!";
+        }
+        else{
+            runStatus=0;
+
+        }
+        showBottomInfo();
+        showCursor();
+    }
+    else if(commandInput==":w"){
+        commandInput="";
+        if(contentChangeFlag){
+            save();
+            opstk.clear();
+            bottomContent="file saved";
+            contentChangeFlag=0;
+        }
+        else{
+            bell();
+            bottomContent="do not need to save!";
+        }
+        showBottomInfo();
+        showCursor();
+    }
+    else if(commandInput==":q!"){
+        commandInput="";
+        runStatus=0;
+    }
+    else if(commandInput==":wq"||commandInput==":qw"){
+        commandInput="";
+        save();
+        runStatus=0;
+    }
+    else{
+        commandInput="";
+        bell();
+        bottomContent="no such command!";
+        showBottomInfo();
+        showCursor();
+    }
+}
+
+void commandOtherChar(){
+    commandInput="";
+    bell();
+    bottomContent="illegal char!";
+    showBottomInfo();
+    showCursor();
+}
+
+
+void insertSpecialChar(){
+    switch(input){
+        case 73://pgup
+            if(pageUp()){
+                clear();
+                showUI();
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 81://padown
+            if(pageDown()){
+                clear();
+                showUI();
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 71://home
+            if(home()){
+                clear();
+                showUI();
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 79://end
+            if(end()){
+                clear();
+                showUI();
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 83://delete
+            if((*text.v)[mouse.getY()].size() && mouse.getX() != (*text.v)[mouse.getY()].size()){
+                opstk.pushBack(string(1, (*text.v)[mouse.getY()][mouse.getX()]), operate::add, {mouse.getX(), mouse.getY()});
+                contentChangeFlag=1;
+            }
+            if(deleteCharHere()){
+                initLineInfo(mouse.getY());
+                clear();
+                showUI();
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 72://上
+            if(returnFlag = moveUp()){
+                if(returnFlag==1){
+                    clear();
+                    showUI();
+                }
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 80://下
+            if(returnFlag = moveDown()){
+                if(returnFlag==1){
+                    clear();
+                    showUI();
+                }
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 75://左
+            if(returnFlag = moveLeft()){
+                if(returnFlag==1){
+                    clear();
+                    showUI();
+                }
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        case 77://右
+            if(returnFlag = moveRight()){
+                if(returnFlag==1){
+                    clear();
+                    showUI();
+                }
+            }
+            showBottomInfo();
+            showCursor();
+            break;
+        default://其他特殊字符警告
+            bell();
+            break;
+    }
+}
+
+void insertVisibleChar(){
+    opstk.pushBack(input==9?string(4, ' '):string(1, input), operate::dele, {mouse.getX(), mouse.getY()});
+    contentChangeFlag=1;
+    searchResult->resize(0);
+    if(insertChar(input)){
+        initLineInfo(mouse.getY());
+        //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+    }
+    clear();
+    showUI();
+    showBottomInfo();
+    showCursor();
+}
+
+void insertCharESC(){
+    mode=Mode::command;
+    if(mouse.getX()==(*text.v)[mouse.getY()].size())mouse.renewX(mouse.getX()>0?mouse.getX()-1:0);
+    bottomContent = "--command--";
+    showBottomInfo();
+    showCursor();
+}
+
+void insertCharBackspace(){
+    if(mouse.getX() == 0 && mouse.getY() != 0){
+        //合并行
+        opstk.clear();
+        contentChangeFlag=1;
+    }
+    else if(mouse.getX()!=0){
+        opstk.pushBack(string(1, (*text.v)[mouse.getY()][mouse.getX()-1]), operate::add, {mouse.getX()-1, mouse.getY()});
+        contentChangeFlag=1;
+        searchResult->resize(0);
+    }
+    if(deleteCharBefore()){
+        initLineInfo(mouse.getY()-1);
+        //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+        contentChangeFlag=1;
+        clear();
+        showUI();
+    }
+    showBottomInfo();
+    showCursor();
+}
+
+void insertCharEndLine(){
+    enterKey();
+    //重开行
+    opstk.clear();
+    contentChangeFlag=1;
+    searchResult->resize(0);
+    initLineInfo(mouse.getY()-1);
+    //initLineInfo(text, *vectorLineNumber, *vectorLineCount, myWin, indexCount, 0);
+    clear();
+    showUI();
+    showBottomInfo();
+    showCursor();
 }
