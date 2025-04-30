@@ -1,3 +1,0 @@
-D:/software/myEditor/bin/CMakeFiles/edit.dir
-D:/software/myEditor/bin/CMakeFiles/ALL_BUILD.dir
-D:/software/myEditor/bin/CMakeFiles/ZERO_CHECK.dir
