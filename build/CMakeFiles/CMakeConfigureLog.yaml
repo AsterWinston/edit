@@ -8,6 +8,10 @@ events:
       - "CMakeLists.txt:2 (project)"
     message: |
       The system is: Windows - 10.0.26100 - AMD64
+...
+
+---
+events:
   -
     kind: "message-v1"
     backtrace:
@@ -109,8 +113,8 @@ events:
     checks:
       - "Detecting C compiler ABI info"
     directories:
-      source: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-af1fls"
-      binary: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-af1fls"
+      source: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-s6s1k0"
+      binary: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-s6s1k0"
     cmakeVariables:
       CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
       CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
@@ -119,28 +123,28 @@ events:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-af1fls'
+        Change Dir: 'D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-s6s1k0'
         
-        Run Build Command(s): D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/bin/cmake.exe -E env VERBOSE=1 nmake -f Makefile /nologo cmTC_d04d0\\fast
-        	D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\nmake.exe  -f CMakeFiles\\cmTC_d04d0.dir\\build.make /nologo -L                  CMakeFiles\\cmTC_d04d0.dir\\build
-        Building C object CMakeFiles/cmTC_d04d0.dir/CMakeCCompilerABI.c.obj
-        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E cmake_cl_compile_depends --dep-file=CMakeFiles\\cmTC_d04d0.dir\\CMakeCCompilerABI.c.obj.d --working-dir=D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-af1fls --filter-prefix="注意: 包含文件:  " -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe @C:\\Users\\32362\\AppData\\Local\\Temp\\nmD49A.tmp
+        Run Build Command(s): D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/bin/cmake.exe -E env VERBOSE=1 nmake -f Makefile /nologo cmTC_2c15d\\fast
+        	D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\nmake.exe  -f CMakeFiles\\cmTC_2c15d.dir\\build.make /nologo -L                  CMakeFiles\\cmTC_2c15d.dir\\build
+        Building C object CMakeFiles/cmTC_2c15d.dir/CMakeCCompilerABI.c.obj
+        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E cmake_cl_compile_depends --dep-file=CMakeFiles\\cmTC_2c15d.dir\\CMakeCCompilerABI.c.obj.d --working-dir=D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-s6s1k0 --filter-prefix="注意: 包含文件:  " -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe @C:\\Users\\32362\\AppData\\Local\\Temp\\nm84E2.tmp
         CMakeCCompilerABI.c
-        Linking C executable cmTC_d04d0.exe
-        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E vs_link_exe --msvc-ver=1942 --intdir=CMakeFiles\\cmTC_d04d0.dir --rc="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe" --mt="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe" --manifests -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_d04d0.dir\\objects1.rsp @C:\\Users\\32362\\AppData\\Local\\Temp\\nmD603.tmp
+        Linking C executable cmTC_2c15d.exe
+        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E vs_link_exe --msvc-ver=1942 --intdir=CMakeFiles\\cmTC_2c15d.dir --rc="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe" --mt="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe" --manifests -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_2c15d.dir\\objects1.rsp @C:\\Users\\32362\\AppData\\Local\\Temp\\nm86C7.tmp
         Visual Studio Incremental Link with embedded manifests
-        Create CMakeFiles\\cmTC_d04d0.dir/manifest.rc
-        Create empty: CMakeFiles\\cmTC_d04d0.dir/embed.manifest
+        Create CMakeFiles\\cmTC_2c15d.dir/manifest.rc
+        Create empty: CMakeFiles\\cmTC_2c15d.dir/embed.manifest
         RC Pass 1:
-        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_d04d0.dir/manifest.res CMakeFiles\\cmTC_d04d0.dir/manifest.rc
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_2c15d.dir/manifest.res CMakeFiles\\cmTC_2c15d.dir/manifest.rc
         LINK Pass 1:
-        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_d04d0.dir\\objects1.rsp /out:cmTC_d04d0.exe /implib:cmTC_d04d0.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-af1fls\\cmTC_d04d0.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_d04d0.dir/intermediate.manifest CMakeFiles\\cmTC_d04d0.dir/manifest.res
+        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_2c15d.dir\\objects1.rsp /out:cmTC_2c15d.exe /implib:cmTC_2c15d.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-s6s1k0\\cmTC_2c15d.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_2c15d.dir/intermediate.manifest CMakeFiles\\cmTC_2c15d.dir/manifest.res
         MT:
-        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe /nologo /manifest CMakeFiles\\cmTC_d04d0.dir/intermediate.manifest /out:CMakeFiles\\cmTC_d04d0.dir/embed.manifest /notify_update
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe /nologo /manifest CMakeFiles\\cmTC_2c15d.dir/intermediate.manifest /out:CMakeFiles\\cmTC_2c15d.dir/embed.manifest /notify_update
         RC Pass 2:
-        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_d04d0.dir/manifest.res CMakeFiles\\cmTC_d04d0.dir/manifest.rc
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_2c15d.dir/manifest.res CMakeFiles\\cmTC_2c15d.dir/manifest.rc
         FINAL LINK:
-        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_d04d0.dir\\objects1.rsp /out:cmTC_d04d0.exe /implib:cmTC_d04d0.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-af1fls\\cmTC_d04d0.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_d04d0.dir/intermediate.manifest CMakeFiles\\cmTC_d04d0.dir/manifest.res
+        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_2c15d.dir\\objects1.rsp /out:cmTC_2c15d.exe /implib:cmTC_2c15d.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-s6s1k0\\cmTC_2c15d.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_2c15d.dir/intermediate.manifest CMakeFiles\\cmTC_2c15d.dir/manifest.res
         
       exitCode: 0
   -
@@ -180,8 +184,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-gfqthw"
-      binary: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-gfqthw"
+      source: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-unz0wn"
+      binary: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-unz0wn"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /GR /EHsc"
       CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
@@ -191,28 +195,528 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-gfqthw'
+        Change Dir: 'D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-unz0wn'
         
-        Run Build Command(s): D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/bin/cmake.exe -E env VERBOSE=1 nmake -f Makefile /nologo cmTC_19174\\fast
-        	D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\nmake.exe  -f CMakeFiles\\cmTC_19174.dir\\build.make /nologo -L                  CMakeFiles\\cmTC_19174.dir\\build
-        Building CXX object CMakeFiles/cmTC_19174.dir/CMakeCXXCompilerABI.cpp.obj
-        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E cmake_cl_compile_depends --dep-file=CMakeFiles\\cmTC_19174.dir\\CMakeCXXCompilerABI.cpp.obj.d --working-dir=D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-gfqthw --filter-prefix="注意: 包含文件:  " -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe @C:\\Users\\32362\\AppData\\Local\\Temp\\nmD99C.tmp
+        Run Build Command(s): D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/bin/cmake.exe -E env VERBOSE=1 nmake -f Makefile /nologo cmTC_7af7c\\fast
+        	D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\nmake.exe  -f CMakeFiles\\cmTC_7af7c.dir\\build.make /nologo -L                  CMakeFiles\\cmTC_7af7c.dir\\build
+        Building CXX object CMakeFiles/cmTC_7af7c.dir/CMakeCXXCompilerABI.cpp.obj
+        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E cmake_cl_compile_depends --dep-file=CMakeFiles\\cmTC_7af7c.dir\\CMakeCXXCompilerABI.cpp.obj.d --working-dir=D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-unz0wn --filter-prefix="注意: 包含文件:  " -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe @C:\\Users\\32362\\AppData\\Local\\Temp\\nm8C54.tmp
         CMakeCXXCompilerABI.cpp
-        Linking CXX executable cmTC_19174.exe
-        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E vs_link_exe --msvc-ver=1942 --intdir=CMakeFiles\\cmTC_19174.dir --rc="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe" --mt="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe" --manifests -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_19174.dir\\objects1.rsp @C:\\Users\\32362\\AppData\\Local\\Temp\\nmD9EB.tmp
+        Linking CXX executable cmTC_7af7c.exe
+        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E vs_link_exe --msvc-ver=1942 --intdir=CMakeFiles\\cmTC_7af7c.dir --rc="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe" --mt="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe" --manifests -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_7af7c.dir\\objects1.rsp @C:\\Users\\32362\\AppData\\Local\\Temp\\nm8CD2.tmp
         Visual Studio Incremental Link with embedded manifests
-        Create CMakeFiles\\cmTC_19174.dir/manifest.rc
-        Create empty: CMakeFiles\\cmTC_19174.dir/embed.manifest
+        Create CMakeFiles\\cmTC_7af7c.dir/manifest.rc
+        Create empty: CMakeFiles\\cmTC_7af7c.dir/embed.manifest
         RC Pass 1:
-        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_19174.dir/manifest.res CMakeFiles\\cmTC_19174.dir/manifest.rc
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_7af7c.dir/manifest.res CMakeFiles\\cmTC_7af7c.dir/manifest.rc
         LINK Pass 1:
-        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_19174.dir\\objects1.rsp /out:cmTC_19174.exe /implib:cmTC_19174.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-gfqthw\\cmTC_19174.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_19174.dir/intermediate.manifest CMakeFiles\\cmTC_19174.dir/manifest.res
+        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_7af7c.dir\\objects1.rsp /out:cmTC_7af7c.exe /implib:cmTC_7af7c.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-unz0wn\\cmTC_7af7c.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_7af7c.dir/intermediate.manifest CMakeFiles\\cmTC_7af7c.dir/manifest.res
         MT:
-        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe /nologo /manifest CMakeFiles\\cmTC_19174.dir/intermediate.manifest /out:CMakeFiles\\cmTC_19174.dir/embed.manifest /notify_update
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe /nologo /manifest CMakeFiles\\cmTC_7af7c.dir/intermediate.manifest /out:CMakeFiles\\cmTC_7af7c.dir/embed.manifest /notify_update
         RC Pass 2:
-        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_19174.dir/manifest.res CMakeFiles\\cmTC_19174.dir/manifest.rc
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_7af7c.dir/manifest.res CMakeFiles\\cmTC_7af7c.dir/manifest.rc
         FINAL LINK:
-        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_19174.dir\\objects1.rsp /out:cmTC_19174.exe /implib:cmTC_19174.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-gfqthw\\cmTC_19174.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_19174.dir/intermediate.manifest CMakeFiles\\cmTC_19174.dir/manifest.res
+        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_7af7c.dir\\objects1.rsp /out:cmTC_7af7c.exe /implib:cmTC_7af7c.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-unz0wn\\cmTC_7af7c.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_7af7c.dir/intermediate.manifest CMakeFiles\\cmTC_7af7c.dir/manifest.res
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:227 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'CXX': D:/codetools/MSVC/14.42.34433/bin/Hostx64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/Internal/CMakeDetermineLinkerId.cmake:36 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:264 (cmake_determine_linker_id)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Running the CXX compiler's linker: "D:/codetools/MSVC/14.42.34433/bin/Hostx64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.42.34435.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+...
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      The system is: Windows - 10.0.26100 - AMD64
+...
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler: D:/codetools/MSVC/14.42.34433/bin/Hostx64/x64/cl.exe 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.42.34435 版
+      版权所有(C) Microsoft Corporation。保留所有权利。
+      
+      CMakeCCompilerId.c
+      Microsoft (R) Incremental Linker Version 14.42.34435.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+      
+      /out:CMakeCCompilerId.exe 
+      CMakeCCompilerId.obj 
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.exe"
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.obj"
+      
+      The C compiler identification is MSVC, found in:
+        D:/github/Editor/build/CMakeFiles/4.0.1/CompilerIdC/CMakeCCompilerId.exe
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1281 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:250 (CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Detecting C compiler /showIncludes prefix:
+        main.c
+        注意: 包含文件:  D:\\github\\Editor\\build\\CMakeFiles\\ShowIncludes\\foo.h
+        
+      Found prefix "注意: 包含文件:  "
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler: D:/codetools/MSVC/14.42.34433/bin/Hostx64/x64/cl.exe 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.42.34435 版
+      版权所有(C) Microsoft Corporation。保留所有权利。
+      
+      CMakeCXXCompilerId.cpp
+      Microsoft (R) Incremental Linker Version 14.42.34435.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+      
+      /out:CMakeCXXCompilerId.exe 
+      CMakeCXXCompilerId.obj 
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.exe"
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.obj"
+      
+      The CXX compiler identification is MSVC, found in:
+        D:/github/Editor/build/CMakeFiles/4.0.1/CompilerIdCXX/CMakeCXXCompilerId.exe
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1281 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:250 (CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Detecting CXX compiler /showIncludes prefix:
+        main.c
+        注意: 包含文件:  D:\\github\\Editor\\build\\CMakeFiles\\ShowIncludes\\foo.h
+        
+      Found prefix "注意: 包含文件:  "
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-1q36dd"
+      binary: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-1q36dd"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-1q36dd'
+        
+        Run Build Command(s): D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/bin/cmake.exe -E env VERBOSE=1 nmake -f Makefile /nologo cmTC_cc3e0\\fast
+        	D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\nmake.exe  -f CMakeFiles\\cmTC_cc3e0.dir\\build.make /nologo -L                  CMakeFiles\\cmTC_cc3e0.dir\\build
+        Building C object CMakeFiles/cmTC_cc3e0.dir/CMakeCCompilerABI.c.obj
+        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E cmake_cl_compile_depends --dep-file=CMakeFiles\\cmTC_cc3e0.dir\\CMakeCCompilerABI.c.obj.d --working-dir=D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q36dd --filter-prefix="注意: 包含文件:  " -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe @C:\\Users\\32362\\AppData\\Local\\Temp\\nm12A1.tmp
+        CMakeCCompilerABI.c
+        Linking C executable cmTC_cc3e0.exe
+        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E vs_link_exe --msvc-ver=1942 --intdir=CMakeFiles\\cmTC_cc3e0.dir --rc="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe" --mt="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe" --manifests -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_cc3e0.dir\\objects1.rsp @C:\\Users\\32362\\AppData\\Local\\Temp\\nm12F0.tmp
+        Visual Studio Incremental Link with embedded manifests
+        Create CMakeFiles\\cmTC_cc3e0.dir/manifest.rc
+        Create empty: CMakeFiles\\cmTC_cc3e0.dir/embed.manifest
+        RC Pass 1:
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_cc3e0.dir/manifest.res CMakeFiles\\cmTC_cc3e0.dir/manifest.rc
+        LINK Pass 1:
+        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_cc3e0.dir\\objects1.rsp /out:cmTC_cc3e0.exe /implib:cmTC_cc3e0.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q36dd\\cmTC_cc3e0.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_cc3e0.dir/intermediate.manifest CMakeFiles\\cmTC_cc3e0.dir/manifest.res
+        MT:
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe /nologo /manifest CMakeFiles\\cmTC_cc3e0.dir/intermediate.manifest /out:CMakeFiles\\cmTC_cc3e0.dir/embed.manifest /notify_update
+        RC Pass 2:
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_cc3e0.dir/manifest.res CMakeFiles\\cmTC_cc3e0.dir/manifest.rc
+        FINAL LINK:
+        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_cc3e0.dir\\objects1.rsp /out:cmTC_cc3e0.exe /implib:cmTC_cc3e0.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q36dd\\cmTC_cc3e0.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_cc3e0.dir/intermediate.manifest CMakeFiles\\cmTC_cc3e0.dir/manifest.res
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:227 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'C': D:/codetools/MSVC/14.42.34433/bin/Hostx64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/Internal/CMakeDetermineLinkerId.cmake:36 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:264 (cmake_determine_linker_id)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Running the C compiler's linker: "D:/codetools/MSVC/14.42.34433/bin/Hostx64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.42.34435.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-0ushvy"
+      binary: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-0ushvy"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /GR /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-0ushvy'
+        
+        Run Build Command(s): D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/bin/cmake.exe -E env VERBOSE=1 nmake -f Makefile /nologo cmTC_cac51\\fast
+        	D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\nmake.exe  -f CMakeFiles\\cmTC_cac51.dir\\build.make /nologo -L                  CMakeFiles\\cmTC_cac51.dir\\build
+        Building CXX object CMakeFiles/cmTC_cac51.dir/CMakeCXXCompilerABI.cpp.obj
+        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E cmake_cl_compile_depends --dep-file=CMakeFiles\\cmTC_cac51.dir\\CMakeCXXCompilerABI.cpp.obj.d --working-dir=D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-0ushvy --filter-prefix="注意: 包含文件:  " -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe @C:\\Users\\32362\\AppData\\Local\\Temp\\nm163B.tmp
+        CMakeCXXCompilerABI.cpp
+        Linking CXX executable cmTC_cac51.exe
+        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E vs_link_exe --msvc-ver=1942 --intdir=CMakeFiles\\cmTC_cac51.dir --rc="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe" --mt="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe" --manifests -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_cac51.dir\\objects1.rsp @C:\\Users\\32362\\AppData\\Local\\Temp\\nm16A9.tmp
+        Visual Studio Incremental Link with embedded manifests
+        Create CMakeFiles\\cmTC_cac51.dir/manifest.rc
+        Create empty: CMakeFiles\\cmTC_cac51.dir/embed.manifest
+        RC Pass 1:
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_cac51.dir/manifest.res CMakeFiles\\cmTC_cac51.dir/manifest.rc
+        LINK Pass 1:
+        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_cac51.dir\\objects1.rsp /out:cmTC_cac51.exe /implib:cmTC_cac51.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-0ushvy\\cmTC_cac51.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_cac51.dir/intermediate.manifest CMakeFiles\\cmTC_cac51.dir/manifest.res
+        MT:
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe /nologo /manifest CMakeFiles\\cmTC_cac51.dir/intermediate.manifest /out:CMakeFiles\\cmTC_cac51.dir/embed.manifest /notify_update
+        RC Pass 2:
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_cac51.dir/manifest.res CMakeFiles\\cmTC_cac51.dir/manifest.rc
+        FINAL LINK:
+        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_cac51.dir\\objects1.rsp /out:cmTC_cac51.exe /implib:cmTC_cac51.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-0ushvy\\cmTC_cac51.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_cac51.dir/intermediate.manifest CMakeFiles\\cmTC_cac51.dir/manifest.res
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:227 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'CXX': D:/codetools/MSVC/14.42.34433/bin/Hostx64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/Internal/CMakeDetermineLinkerId.cmake:36 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:264 (cmake_determine_linker_id)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Running the CXX compiler's linker: "D:/codetools/MSVC/14.42.34433/bin/Hostx64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.42.34435.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+...
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      The system is: Windows - 10.0.26100 - AMD64
+...
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler: D:/codetools/MSVC/14.42.34433/bin/Hostx64/x64/cl.exe 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.42.34435 版
+      版权所有(C) Microsoft Corporation。保留所有权利。
+      
+      CMakeCCompilerId.c
+      Microsoft (R) Incremental Linker Version 14.42.34435.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+      
+      /out:CMakeCCompilerId.exe 
+      CMakeCCompilerId.obj 
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.exe"
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.obj"
+      
+      The C compiler identification is MSVC, found in:
+        D:/github/Editor/build/CMakeFiles/4.0.1/CompilerIdC/CMakeCCompilerId.exe
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1281 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:250 (CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Detecting C compiler /showIncludes prefix:
+        main.c
+        注意: 包含文件:  D:\\github\\Editor\\build\\CMakeFiles\\ShowIncludes\\foo.h
+        
+      Found prefix "注意: 包含文件:  "
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler: D:/codetools/MSVC/14.42.34433/bin/Hostx64/x64/cl.exe 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.42.34435 版
+      版权所有(C) Microsoft Corporation。保留所有权利。
+      
+      CMakeCXXCompilerId.cpp
+      Microsoft (R) Incremental Linker Version 14.42.34435.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+      
+      /out:CMakeCXXCompilerId.exe 
+      CMakeCXXCompilerId.obj 
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.exe"
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.obj"
+      
+      The CXX compiler identification is MSVC, found in:
+        D:/github/Editor/build/CMakeFiles/4.0.1/CompilerIdCXX/CMakeCXXCompilerId.exe
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1281 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:250 (CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Detecting CXX compiler /showIncludes prefix:
+        main.c
+        注意: 包含文件:  D:\\github\\Editor\\build\\CMakeFiles\\ShowIncludes\\foo.h
+        
+      Found prefix "注意: 包含文件:  "
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-xljiae"
+      binary: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-xljiae"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-xljiae'
+        
+        Run Build Command(s): D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/bin/cmake.exe -E env VERBOSE=1 nmake -f Makefile /nologo cmTC_f4b10\\fast
+        	D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\nmake.exe  -f CMakeFiles\\cmTC_f4b10.dir\\build.make /nologo -L                  CMakeFiles\\cmTC_f4b10.dir\\build
+        Building C object CMakeFiles/cmTC_f4b10.dir/CMakeCCompilerABI.c.obj
+        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E cmake_cl_compile_depends --dep-file=CMakeFiles\\cmTC_f4b10.dir\\CMakeCCompilerABI.c.obj.d --working-dir=D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xljiae --filter-prefix="注意: 包含文件:  " -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe @C:\\Users\\32362\\AppData\\Local\\Temp\\nmC90B.tmp
+        CMakeCCompilerABI.c
+        Linking C executable cmTC_f4b10.exe
+        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E vs_link_exe --msvc-ver=1942 --intdir=CMakeFiles\\cmTC_f4b10.dir --rc="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe" --mt="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe" --manifests -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_f4b10.dir\\objects1.rsp @C:\\Users\\32362\\AppData\\Local\\Temp\\nmCAE1.tmp
+        Visual Studio Incremental Link with embedded manifests
+        Create CMakeFiles\\cmTC_f4b10.dir/manifest.rc
+        Create empty: CMakeFiles\\cmTC_f4b10.dir/embed.manifest
+        RC Pass 1:
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_f4b10.dir/manifest.res CMakeFiles\\cmTC_f4b10.dir/manifest.rc
+        LINK Pass 1:
+        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_f4b10.dir\\objects1.rsp /out:cmTC_f4b10.exe /implib:cmTC_f4b10.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xljiae\\cmTC_f4b10.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_f4b10.dir/intermediate.manifest CMakeFiles\\cmTC_f4b10.dir/manifest.res
+        MT:
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe /nologo /manifest CMakeFiles\\cmTC_f4b10.dir/intermediate.manifest /out:CMakeFiles\\cmTC_f4b10.dir/embed.manifest /notify_update
+        RC Pass 2:
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_f4b10.dir/manifest.res CMakeFiles\\cmTC_f4b10.dir/manifest.rc
+        FINAL LINK:
+        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_f4b10.dir\\objects1.rsp /out:cmTC_f4b10.exe /implib:cmTC_f4b10.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xljiae\\cmTC_f4b10.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_f4b10.dir/intermediate.manifest CMakeFiles\\cmTC_f4b10.dir/manifest.res
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:227 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'C': D:/codetools/MSVC/14.42.34433/bin/Hostx64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/Internal/CMakeDetermineLinkerId.cmake:36 (message)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:264 (cmake_determine_linker_id)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Running the C compiler's linker: "D:/codetools/MSVC/14.42.34433/bin/Hostx64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.42.34435.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-3ru54p"
+      binary: "D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-3ru54p"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /GR /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/github/Editor/build/CMakeFiles/CMakeScratch/TryCompile-3ru54p'
+        
+        Run Build Command(s): D:/codetools/Cmake/cmake-4.0.1-windows-x86_64/bin/cmake.exe -E env VERBOSE=1 nmake -f Makefile /nologo cmTC_c82ed\\fast
+        	D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\nmake.exe  -f CMakeFiles\\cmTC_c82ed.dir\\build.make /nologo -L                  CMakeFiles\\cmTC_c82ed.dir\\build
+        Building CXX object CMakeFiles/cmTC_c82ed.dir/CMakeCXXCompilerABI.cpp.obj
+        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E cmake_cl_compile_depends --dep-file=CMakeFiles\\cmTC_c82ed.dir\\CMakeCXXCompilerABI.cpp.obj.d --working-dir=D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3ru54p --filter-prefix="注意: 包含文件:  " -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe @C:\\Users\\32362\\AppData\\Local\\Temp\\nmD0CC.tmp
+        CMakeCXXCompilerABI.cpp
+        Linking CXX executable cmTC_c82ed.exe
+        	D:\\codetools\\Cmake\\cmake-4.0.1-windows-x86_64\\bin\\cmake.exe -E vs_link_exe --msvc-ver=1942 --intdir=CMakeFiles\\cmTC_c82ed.dir --rc="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe" --mt="D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe" --manifests -- D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_c82ed.dir\\objects1.rsp @C:\\Users\\32362\\AppData\\Local\\Temp\\nmD14A.tmp
+        Visual Studio Incremental Link with embedded manifests
+        Create CMakeFiles\\cmTC_c82ed.dir/manifest.rc
+        Create empty: CMakeFiles\\cmTC_c82ed.dir/embed.manifest
+        RC Pass 1:
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_c82ed.dir/manifest.res CMakeFiles\\cmTC_c82ed.dir/manifest.rc
+        LINK Pass 1:
+        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_c82ed.dir\\objects1.rsp /out:cmTC_c82ed.exe /implib:cmTC_c82ed.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3ru54p\\cmTC_c82ed.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_c82ed.dir/intermediate.manifest CMakeFiles\\cmTC_c82ed.dir/manifest.res
+        MT:
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\mt.exe /nologo /manifest CMakeFiles\\cmTC_c82ed.dir/intermediate.manifest /out:CMakeFiles\\cmTC_c82ed.dir/embed.manifest /notify_update
+        RC Pass 2:
+        D:\\codetools\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\rc.exe /fo CMakeFiles\\cmTC_c82ed.dir/manifest.res CMakeFiles\\cmTC_c82ed.dir/manifest.rc
+        FINAL LINK:
+        D:\\codetools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\link.exe /nologo @CMakeFiles\\cmTC_c82ed.dir\\objects1.rsp /out:cmTC_c82ed.exe /implib:cmTC_c82ed.lib /pdb:D:\\github\\Editor\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3ru54p\\cmTC_c82ed.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\\cmTC_c82ed.dir/intermediate.manifest CMakeFiles\\cmTC_c82ed.dir/manifest.res
         
       exitCode: 0
   -

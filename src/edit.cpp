@@ -9,13 +9,14 @@ using std::string;
 Text text;
 string file;
 int main(int argc, char* argv[]){
+
     if(argc==1){
         cout<<"parameter too less!"<<endl;
         return -1;
     }
     else if(argc==2){
         char path[MAX_DIR_SIZE];
-        _getcwd(path, MAX_DIR_SIZE);
+        _getcwd(path, MAX_DIR_SIZE);//get current directory
         vector<string> v;
         v.push_back(string(path));
         v.push_back(string(argv[1]));
