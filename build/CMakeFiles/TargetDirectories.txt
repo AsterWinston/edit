@@ -1,3 +1,0 @@
-D:/github/Editor/build/CMakeFiles/edit.dir
-D:/github/Editor/build/CMakeFiles/edit_cache.dir
-D:/github/Editor/build/CMakeFiles/rebuild_cache.dir
